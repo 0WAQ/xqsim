@@ -1,0 +1,68 @@
+[project]
+name = "qsim-py"
+version = "1.3.7"
+description = "Quantitative simulation stack: qsim core engine + data providers + Prefect-based data tools."
+readme = "CLAUDE.md"
+requires-python = ">=3.8,<3.10"
+license = { text = "MIT" }
+
+# 依赖来源:
+#   - xiao_qsim_dev/src/qsim/setup/requirements.txt
+#   - xiao_qsim_tools/setup.py
+#   - 实际源码 import (补 lz4 等)
+dependencies = [
+    # qsim core
+    "numpy>=1.13.0",
+    "pandas",
+    "pyyaml",
+    "sortedcollections",
+    "click",
+    "numcodecs",
+    "cython",
+    "xmltodict",
+    "lz4",
+    "pymysql",
+    "pycryptodome",
+    "redis",
+
+    # qsim_data_tools (Prefect 0.14 锁死, 仅在 Python<3.10 可用)
+    "prefect==0.14.15",
+    "prefect[viz]==0.14.15",
+    "paramiko",
+    "pytz",
+]
+
+[project.optional-dependencies]
+dev = [
+    "ipython",
+    "jupyter",
+]
+
+[project.scripts]
+qsim = "qsim.qsim_run:main"
+stats_general = "qsim.modules.stats_general:main"
+update_tools = "qsim_data_tools.update_tools:cli"
+
+# ---------------------------------------------------------------------
+# 三个子包都用 src layout, 这里通过 tool.uv.sources + tool.hatch
+# 让 uv/hatchling 能同时识别它们.
+# 选用 hatchling 作为 build backend, 多包通过 [tool.hatch.build.targets.wheel]
+# 的 packages 列表声明.
+# ---------------------------------------------------------------------
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = [
+    "xiao_qsim_dev/src/qsim",
+    "xiao_qsim_tools/src/qsim_data_tools",
+]
+
+[tool.hatch.build.targets.wheel.sources]
+"xiao_qsim_dev/src/qsim" = "qsim"
+"xiao_qsim_tools/src/qsim_data_tools" = "qsim_data_tools"
+
+[tool.uv]
+# 锁定 Python 解释器范围, 避开 prefect 0.14 不兼容 3.10+ 的问题
+package = true

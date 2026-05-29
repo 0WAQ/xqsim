@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<QSim>
+
+    <Macros MODULES="/home/michael/workspace/module_demo"/>
+    <Constants backdays="6" niodatapath="/home/michael/cc" overwrite="force" adj_window="5"
+               checkpoint="true" checkpointDir="checkpoint" checkpointDays="1"/>
+    <Caches>
+        <Cache path="/cc_prod"/>
+    </Caches>
+    <Universe startdate="20220401" enddate="20220428"/>
+    <Modules>
+        <Module id="AlphaDemo" path="module_demo/alpha_demo.py" handler="AlphaHandler"/>
+        <Module id="OpDemo" path="${MODULES}/op_demo.py" handler="AlphaOpsHandler"/>
+        <Module id="OpPower" path="${MODULES}/alphaoppower.py" handler="AlphaOpsHandler"/>
+        <Module id="OP2" path="${MODULES}/alphaopemadecay.py" handler="AlphaOpsHandler"/>
+        <Module id="OP3" path="${MODULES}/alphaopriskneut.py" handler="AlphaOpsHandler"/>
+        <Module id="StatsSimple" path="${qsim_modules}/stats_general.py" handler="StatsRegistry"/>
+        <Module id="PortfolioSimple" path="${MODULES}/portfolio.py" handler="PortfolioHandler"/>
+    </Modules>
+    <Portfolio booksize="20e6" moduleId="PortfolioSimple" id="MyPort" homecurrency="CNY" combinationId="AlphaComboSimple" printStats="true" checkpoint="true" save="true"
+               save_csv="csv">
+        <Stats moduleId="StatsSimple" vwappnl="false" print="true" book_size="2e7" trade_price="close" expert="true"/>
+        <Alpha moduleId="AlphaDemo" id="alpha_demo2" universeId="uv.all" delay="1" n="5" save_csv="csv">
+        </Alpha>
+        <Alpha moduleId="AlphaDemo" id="alpha_demo" universeId="uv.zz1000" delay="1" n="5" save="true" save_csv="csv">
+            <Operations>
+                <Operation moduleId="OpPower"/>
+                <Operation moduleId="OP2"/>
+                <Operation moduleId="OP3"/>
+            </Operations>
+        </Alpha>
+
+        <!--        <Alpha moduleId="AlphaDemo" id="alpha_demo2" universeId="uv.all" delay="1" n="5" save_csv="dump_csv">-->
+        <!--            <Operations>-->
+        <!--                <Operation moduleId="OpDemo" group="country" riskFactor="cap" riskMode="1"/>-->
+        <!--                <Operation moduleId="OpDemo" group="country" riskFactor="cap" riskMode="1"/>-->
+        <!--            </Operations>-->
+        <!--        </Alpha>-->
+    </Portfolio>
+</QSim>

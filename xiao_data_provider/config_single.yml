@@ -1,0 +1,47 @@
+macro:
+  provider_dir: "/home/bsim/data_provider"
+
+global:
+  meta_dir: "/cc"
+  output_cache_dir: "/srv/data/cc_single"
+  begin_date: "20130101"
+  end_date: "TODAY"
+  build: true
+
+provider:
+
+  KLine:
+    file_path: "${provider_dir}/kline.py"
+
+  Universe:
+    file_path: "${provider_dir}/universe.py"
+## financial_simple
+#  ASHAREANNFINANCIALINDICATOR:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#  ASHAREAUDITOPINION:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#  ASHAREFINANCIALINDICATOR:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#  ASHAREISSUINGDATEPREDICT:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    extra:
+#      - S_STM_PREDICT_ISSUINGDATE
+#      - S_STM_ACTUAL_ISSUINGDATE
+#      - S_STM_CORRECT_NUM
+#      - S_STM_CORRECT_ISSUINGDATE
+#  ASHAREPROFITEXPRESS:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    actual_ann_dt: "ACTUAL_ANN_DT"
+#  ASHAREPROFITNOTICE:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    ann_dt: "S_PROFITNOTICE_DATE"
+#    report_period: "S_PROFITNOTICE_PERIOD"
+#    extra:
+#      - S_PROFITNOTICE_SIGNCHANGE
+#      - S_PROFITNOTICE_FIRSTANNDATE
+#
+#  ASHAREACCOUNTINGCHANGE:
+#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    comp: true
+#    report_period: "BE_AFFECTED_REPORT_PERIOD"
+#    ann_dt: "ANN_DATE"

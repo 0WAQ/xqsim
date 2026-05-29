@@ -1,0 +1,13 @@
+macro:
+  provider_path: "../data_provider"
+
+global:
+  meta_dir: "./cc_test"
+  dst_cache_dir: "./cc_test"
+  output_cache_dir: "${provider_path}/cc_update"
+  build: true
+
+meta_updater: "${provider_path}/meta_updater.py"
+
+build:
+  base: "${provider_path}/config_debug.yml"

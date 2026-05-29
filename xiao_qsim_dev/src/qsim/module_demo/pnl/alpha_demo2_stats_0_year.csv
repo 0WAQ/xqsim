@@ -1,0 +1,2 @@
+Dates,Long(M),Short(M),PnL(M),Ret(%),TVR(%),MDD(%),Calmar,Sharpe,Sortino,Win(%),MDD_Date,MDD_Dur,LongNum,ShortNum,BPMargin,Fitness,IC
+20180130-20180131,12.7214,-7.2786,-0.2423,-2.423,79.6279,2.423,-1.0,-15.8114,inf,0.0,20180131,1,2175,1068,-76.0736,-2.7581,-0.1033

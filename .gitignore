@@ -1,0 +1,105 @@
+# ---------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.dylib
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Cython artefacts produced by build_cython.py
+xiao_qsim_dev/src/qsim/build_tmp/
+xiao_qsim_dev/src/qsim/release/output/
+*.c
+
+# ---------------------------------------------------------------------
+# uv / virtual env
+# ---------------------------------------------------------------------
+.venv/
+venv/
+env/
+.python-version
+
+# ---------------------------------------------------------------------
+# IDE / editor
+# ---------------------------------------------------------------------
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ---------------------------------------------------------------------
+# Testing / coverage
+# ---------------------------------------------------------------------
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# ---------------------------------------------------------------------
+# Jupyter
+# ---------------------------------------------------------------------
+.ipynb_checkpoints/
+
+# ---------------------------------------------------------------------
+# Project-specific data caches
+# qsim 把缓存写到 meta_dir / output_cache_dir，体积大且日变，
+# 这些目录不应进 git。
+# ---------------------------------------------------------------------
+# 仅忽略业务数据目录 (Data/), 保留 meta/ (DateIndex/InstrumentIndex 等),
+# 否则引擎 meta_loader 会找不到索引文件.
+xiao_data_provider/cc/Data/
+xiao_data_provider/cc_update/Data/
+/cc/Data/
+/cc_update/Data/
+cc_temp/
+cc_prod/
+checkpoint/
+**/save.bin
+
+# 单测 / Prefect / supervisord 运行时产物
+/tmp/ut/
+*.log
+result.html
+result.log
+
+# ---------------------------------------------------------------------
+# 凭证 / 本地配置（默认不提交，按需放回）
+# ---------------------------------------------------------------------
+# mysql.json / mysql_235.json 当前是占位值，可以留在仓库里；
+# 如果以后改成真实凭证，把下面两行打开。
+# xiao_data_provider/mysql.json
+# xiao_data_provider/mysql_235.json
+.env
+.env.*
+!.env.example
+
+# ---------------------------------------------------------------------
+# Claude Code 本地配置（项目内的 .claude 目录通常不入库）
+# ---------------------------------------------------------------------
+.claude/

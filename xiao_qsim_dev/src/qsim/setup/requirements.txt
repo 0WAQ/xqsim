@@ -1,0 +1,12 @@
+pip>=20.0.0
+numpy>=1.13.0
+pyyaml
+sortedcollections
+pandas
+click
+numcodecs
+cython
+pycryptodome
+redis
+pymysql
+xmltodict

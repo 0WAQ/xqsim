@@ -1,0 +1,59 @@
+macro:
+  provider_dir: "."
+
+global:
+  meta_dir: "./cc"
+  output_cache_dir: "${provider_dir}/cc_update"
+  begin_date: "20130101"
+  end_date: "20211231"
+  build: true
+
+provider:
+  local:
+    mysql_config: "mysql_235.json"
+#  KLine:
+#    file_path: "${provider_dir}/kline.py"
+#  Universe:
+#    file_path: "${provider_dir}/universe.py"
+#  Barra:
+#    file_path: "${provider_dir}/barra.py"
+#  Industry:
+#    file_path: "${provider_dir}/industry.py"
+#  IndexKLine:
+#    file_path: "${provider_dir}/index_kline.py"
+#  ComponentWeight:
+#    file_path: "${provider_dir}/component_weight.py"
+#  CiticsIndex:
+#    file_path: "${provider_dir}/citics_index_kline.py"
+
+## intra day
+#  KLineIntraday:
+#    file_path: "${provider_dir}/kline_intraday.py"
+#  IndexKLineIntraday:
+#    file_path: "${provider_dir}/index_kline_intraday.py"
+
+## wind daily
+#  ASHAREMONEYFLOW:
+#    file_path: "${provider_dir}/wind_common.py"
+#    abbr: "mf"
+#  ASHAREEODDERIVATIVEINDICATOR:
+#    file_path: "${provider_dir}/wind_common.py"
+#    abbr: "dv"
+#  SHSCCHANNELHOLDINGS:
+#    file_path: "${provider_dir}/wind_common.py"
+#    abbr: "shsc"
+#    code_find: true
+
+## financial_statement
+  ASHAREINCOME:
+    file_path: "${provider_dir}/wind_financial_statement.py"
+    abbr: "ic"
+  ASHAREBALANCESHEET:
+    file_path: "${provider_dir}/wind_financial_statement.py"
+    abbr: "bs"
+  ASHARECASHFLOW:
+    file_path: "${provider_dir}/wind_financial_statement.py"
+    abbr: "cf"
+
+
+

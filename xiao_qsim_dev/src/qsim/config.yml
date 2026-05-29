@@ -1,0 +1,58 @@
+macro:
+  provider_dir: "./module"
+
+global:
+  meta_dir: "./cc"
+  output_cache_dir: "${provider_dir}/cc_temp"
+  begin_date: "20210901"
+  end_date: "20210915"
+  interval: "day"
+  back_days: 0
+  cache_list:
+    - "${provider_dir}/cc_temp"
+#  build: true
+
+provider:
+  KLine:
+    file_path: "${provider_dir}/kline.py"
+
+  Universe:
+    file_path: "${provider_dir}/universe.py"
+
+  IndexKLine:
+    file_path: "${provider_dir}/index_kline.py"
+
+module:
+  alpha:
+    alpha_test: "${provider_dir}/alpha_test.py"
+    alpha_empty: "${provider_dir}/alpha_empty.py"
+
+  stats:
+    stats_general: "${qsim_modules}/stats_general.py"
+
+
+alpha:
+  local:
+    save: true
+    overwrite: "force"
+  alpha1:
+    module_id: "alpha_empty"
+    csv: "./simple_alpha.csv"
+    stats:
+      module_id: "stats_general"
+      book_size: 2e6
+#      universe: "hs300"
+      benchmark: "hs300"
+      trade_price: "close"
+#      top: 0
+#      norm: -1
+#      limit: true
+#      - module_id: "stats_general"
+#        book_size: 2e5
+#        benchmark: "zz500"
+#        limit: true
+#  alpha_id1:
+#    module_id: "alpha_test"
+#    stats:
+#      module_id: "stats_general"
+#      book_size: 2e4

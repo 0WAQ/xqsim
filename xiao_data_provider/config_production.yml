@@ -1,0 +1,38 @@
+macro:
+  provider_dir: "/home/michael/data_provider"
+
+global:
+  meta_dir: "./cc"
+  output_cache_dir: "${provider_dir}/cc_update"
+  begin_date: "TODAY-10"
+  end_date: "TODAY-1"
+  build: true
+
+provider:
+  local:
+    mysql_config: "mysql.json"
+  Universe:
+    file_path: "${provider_dir}/universe.py"
+  Industry:
+    file_path: "${provider_dir}/industry.py"
+  KLine:
+    file_path: "${provider_dir}/kline.py"
+#  Barra:
+#    file_path: "${provider_dir}/barra.py"
+  IndexKLine:
+    file_path: "${provider_dir}/index_kline.py"
+#  ComponentWeight:
+#    file_path: "${provider_dir}/component_weight.py"
+#  CiticsIndex:
+#    file_path: "${provider_dir}/citics_index_kline.py"
+
+## wind daily
+  ASHAREMONEYFLOW:
+    file_path: "${provider_dir}/wind_common.py"
+    abbr: "mf"
+  ASHAREEODDERIVATIVEINDICATOR:
+    file_path: "${provider_dir}/wind_common.py"
+    abbr: "dv"
+
+
+

@@ -1,0 +1,20 @@
+macro:
+  provider_path: "/home/michael/qsim_provider"
+
+global:
+  meta_dir: "/cc"
+  dst_cache_dir: "/cc"
+  output_cache_dir: "/cc_update"
+  build: true
+
+meta_updater: "${provider_path}/meta_updater.py"
+
+build:
+  base: "${provider_path}/config_production.yml"
+
+client:
+  - "192.168.1.69"
+
+ut:
+  command: "/opt/conda/envs/conda_env/bin/python /home/michael/qsim_tools/ut/ut_run.py"
+  result_path: "/tmp/ut/result.log"

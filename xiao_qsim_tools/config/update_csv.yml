@@ -1,0 +1,8 @@
+build:
+  base:
+    begin_date: "TODAY-1"
+    end_date: "TODAY"
+    config: "/home/prod/prod/config_risk2.xml"
+    dst_cache_dir: "/cc_prod"
+    output_cache_dir: "/cc_update_csv"
+    save_csv: "/cc_update_csv/csv"

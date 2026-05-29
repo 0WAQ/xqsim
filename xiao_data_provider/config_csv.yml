@@ -1,0 +1,47 @@
+macro:
+  provider_dir: "."
+
+global:
+  meta_dir: "/cc"
+  output_cache_dir: "${provider_dir}/cc_temp"
+  begin_date: "20170103"
+  end_date: "20210108"
+  data_limit: 4
+  interval: "day"
+  trigger:
+    type: "once"
+    source: "system"
+    delay: 10
+  back_days: 0
+
+module:
+  factor:
+    factor_csv: "${provider_dir}/factor_csv.py"
+
+  stats:
+    stats_general: "${bsim_modules}/stats_general.py"
+
+
+alpha:
+  local:
+    save: false
+  factor1:
+    module_id: "factor_csv"
+    csv: "./simple_alpha.csv"
+    stats:
+      module_id: "stats_general"
+#      book_size: 2e6
+#      universe: "hs300"
+#      benchmark: "all"
+#      top: 0
+      norm: -1
+#      limit: true
+#      - module_id: "stats_general"
+#        book_size: 2e5
+#        benchmark: "zz500"
+#        limit: true
+#  factor_id1:
+#    module_id: "factor_test"
+#    stats:
+#      module_id: "stats_general"
+#      book_size: 2e4
