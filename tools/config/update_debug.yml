@@ -1,9 +1,9 @@
 macro:
-  provider_path: "../data_provider"
+  provider_path: "../../providers"
 
 global:
-  meta_dir: "./cc_test"
-  dst_cache_dir: "./cc_test"
+  meta_dir: "../../providers/cc"
+  dst_cache_dir: "../../providers/cc"
   output_cache_dir: "${provider_path}/cc_update"
   build: true
 

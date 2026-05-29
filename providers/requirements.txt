@@ -1,4 +1,0 @@
-qsim
-pandas
-pymysql
-sortedcollections

@@ -10,7 +10,7 @@ global:
 
 provider:
   local:
-    mysql_config: "mysql_235.json"
+    mysql_config: "mysql.json"
 #  KLine:
 #    file_path: "${provider_dir}/kline.py"
 #  Universe:

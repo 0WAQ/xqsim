@@ -7,7 +7,7 @@ class Provider(StaticProvider):
         self.db_name = "barra"
         self.abbr = "barra"
         self.factor_dict = {}
-        self.mysql_config = "mysql_235.json"
+        self.mysql_config = "mysql.json"
 
     def generate_matrix(self):
         table_name_dict = {

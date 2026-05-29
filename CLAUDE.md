@@ -26,20 +26,18 @@ qsim-py/
 ├── tools/                 # operational scripts not part of the installable packages
 │   ├── ut/                # HTML-report unit tests over a built data cache
 │   ├── config/            # update_production / update_debug / update_csv* yaml
-│   ├── install/           # supervisord.conf, prefect backend.toml
-│   ├── prefect_common.py  # legacy stand-alone Prefect helpers
-│   ├── prefect_csv.py
-│   ├── init.sh            # bring up local Prefect server
-│   ├── run_agent.sh       # launch supervised prefect agent
-│   ├── cc_test/
+│   ├── prefect/           # Prefect server + agent + helpers (all in one place)
+│   │   ├── backend.toml
+│   │   ├── supervisord.conf
+│   │   ├── init_server.sh # bring up local Prefect server
+│   │   ├── run_agent.sh   # launch supervised prefect agent
+│   │   ├── common.py      # legacy stand-alone Prefect flow helpers
+│   │   └── csv_flow.py
 │   └── release/           # Cython release pipeline (kept separate from src/)
 │       ├── release.sh
 │       ├── build_cython.py
-│       ├── legacy_requirements.txt   # superseded by pyproject.toml
-│       ├── legacy_qsim_setup.py      # superseded by pyproject.toml
-│       └── legacy_data_tools_setup.py
-└── scripts/
-    └── smoke_test/        # ad-hoc main*.py scripts (load adj data, summarize, etc.)
+│       └── setup/
+│           └── setup.py   # wheel-only setup; runtime deps live in pyproject.toml
 ```
 
 `providers/` files are NOT pip-installed — they are referenced as absolute paths from
@@ -56,10 +54,12 @@ uv add --dev <pkg>      # dev-only dep
 ```
 
 The Cython release pipeline (Cython-compile most of `qsim/` to `.so`) lives in
-`tools/release/`. It still uses the legacy `legacy_qsim_setup.py` + `build_cython.py`,
-not pyproject.toml — `release.sh` is independent of uv. The `copy_only_list` in
-`build_cython.py` controls which files stay as plain Python (public API, base classes,
-entry points). Edit it when adding files that must remain importable as source.
+`tools/release/`. `release.sh` calls `build_cython.py`, which uses
+`tools/release/setup/setup.py` to build a wheel of the compiled `.so` files.
+Runtime dependencies are managed by `pyproject.toml`, NOT by this setup.py.
+The `copy_only_list` in `build_cython.py` controls which files stay as plain
+Python (public API, base classes, entry points). Edit it when adding files
+that must remain importable as source.
 
 Console entry points (declared in `pyproject.toml`):
 - `qsim` → `qsim.qsim_run:main`
@@ -86,8 +86,7 @@ uv run qsim -c <config.yml | config.xml>
 The same simulator can also be driven from a Python module by calling
 `simulator_run(**kwargs)` (alpha) or `builder_run(**kwargs)` (provider) — the
 `__main__` module's file path becomes the alpha/provider source. Demos live in
-`examples/module_demo/`. `providers/dmgr_demo.py` and `providers/factor_load.py` are
-similar single-file launchers.
+`examples/module_demo/`.
 
 `build: true` in `global:` short-circuits after providers run — useful for refreshing
 the cache without simulating. See `providers/config_production.yml` for the canonical
@@ -138,9 +137,11 @@ renaming a provider file means updating every YAML/XML that references it.
   **Note:** the legacy code targets `prefect 0.14.15`, which does not support
   Python 3.12+. The dependency is currently commented out in `pyproject.toml` —
   upgrade to Prefect 2.x/3.x before re-enabling.
-- Bring up a local Prefect server with `bash tools/init.sh`, then run an agent under
-  supervisord with `bash tools/run_agent.sh` (writes `~/supervisor/supervisord.conf`,
-  listens on port 9001).
+- Bring up a local Prefect server with `bash tools/prefect/init_server.sh`,
+  then run an agent under supervisord with `bash tools/prefect/run_agent.sh`
+  (writes `~/supervisor/supervisord.conf`, listens on port 9001). Stand-alone
+  helper flows (not part of the `qsim_data_tools` package) live next to it as
+  `tools/prefect/common.py` and `tools/prefect/csv_flow.py`.
 
 ## Tests
 
@@ -157,8 +158,8 @@ the `html_runner.add_module(...)` calls or use
 `HTMLRunner.run_test("ut_cls.kline", dr)`. Output goes to `/tmp/ut/result.html` and a
 summary `result.log`. The Prefect flow consumes that `result.log`.
 
-`scripts/smoke_test/main*.py` are ad-hoc smoke scripts (load adj data, summarize, etc.)
-— run them directly with `uv run python scripts/smoke_test/main.py`.
+`scripts/smoke_test/` was removed in the 2026-05 cleanup; use `tools/ut/ut_run.py`
+or write a one-off `examples/module_demo/`-style script instead.
 
 ## Conventions worth knowing
 
@@ -167,9 +168,10 @@ summary `result.log`. The Prefect flow consumes that `result.log`.
   `update_tools merge_dir`. Don't write straight into `/cc` from a provider.
 - Date strings `"TODAY-N"` and `"TODAY+N"` are resolved by the loader; pass them
   through configs rather than computing dates in Python.
-- MySQL credentials live in `providers/mysql.json` (and `mysql_235.json`). Providers
-  default to `mysql.json` next to `static_provider.py`; override per-provider via
-  `mysql_config` in the YAML.
+- MySQL credentials live in `providers/mysql.json`. Providers default to that
+  filename next to `static_provider.py`; override per-provider via `mysql_config`
+  in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
+  replace it locally before pointing at a real DB.
 - The Cython release pipeline means: if you add a new module under `src/qsim/` that
   needs to be importable as source (base class, public API, entry point), add it to
   `copy_only_list` in `tools/release/build_cython.py`. Otherwise it will be shipped

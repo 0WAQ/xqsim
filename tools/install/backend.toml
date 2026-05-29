@@ -1,7 +1,0 @@
-backend = "server"
-
-[server]
-host = "http://127.0.0.1"
-port = "4200"
-host_port = "4200"
-endpoint = "${server.host}:${server.port}"

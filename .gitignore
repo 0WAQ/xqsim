@@ -92,10 +92,9 @@ result.log
 # ---------------------------------------------------------------------
 # 凭证 / 本地配置（默认不提交，按需放回）
 # ---------------------------------------------------------------------
-# mysql.json / mysql_235.json 当前是占位值，可以留在仓库里；
-# 如果以后改成真实凭证，把下面两行打开。
-# xiao_data_provider/mysql.json
-# xiao_data_provider/mysql_235.json
+# providers/mysql.json 当前是占位值, 入库; 如果之后填入真实凭证,
+# 把下面这行的注释去掉.
+# providers/mysql.json
 .env
 .env.*
 !.env.example
