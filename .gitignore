@@ -26,9 +26,10 @@ wheels/
 *.egg
 MANIFEST
 
-# Cython artefacts produced by build_cython.py
-xiao_qsim_dev/src/qsim/build_tmp/
-xiao_qsim_dev/src/qsim/release/output/
+# Cython artefacts produced by tools/release/build_cython.py
+src/qsim/build_tmp/
+tools/release/output/
+build_tmp/
 *.c
 
 # ---------------------------------------------------------------------
@@ -73,8 +74,8 @@ coverage.xml
 # ---------------------------------------------------------------------
 # 仅忽略业务数据目录 (Data/), 保留 meta/ (DateIndex/InstrumentIndex 等),
 # 否则引擎 meta_loader 会找不到索引文件.
-xiao_data_provider/cc/Data/
-xiao_data_provider/cc_update/Data/
+providers/cc/Data/
+providers/cc_update/Data/
 /cc/Data/
 /cc_update/Data/
 cc_temp/
