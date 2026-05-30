@@ -11,7 +11,7 @@ license = { text = "MIT" }
 #   - 实际源码 import (numpy/pandas/lz4/pymysql/...)
 #
 # TODO(deps): 以下依赖待整理 ——
-#   * prefect == 0.14.15 不支持 Python 3.12, 需升级到 prefect 2.x/3.x 并改写 prefect_task.py
+#   * prefect 已升级到 3.x
 #   * pycryptodome / redis 仅 build_cython.py 的 copy_only_list 提到 (crypto_api.py / redis_client.py
 #     源码目前不在仓库里), 真正需要时再加
 dependencies = [
@@ -26,10 +26,8 @@ dependencies = [
     "xmltodict",
     "lz4",
     "pymysql",
-
-    # qsim_data_tools (Prefect 等暂时注释, 升级前不会被装入)
-    # "prefect==0.14.15",
-    # "prefect[viz]==0.14.15",
+    # qsim_data_tools
+    "prefect>=3.0",
     "paramiko",
     "pytz",
 ]

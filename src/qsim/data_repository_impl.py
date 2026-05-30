@@ -606,7 +606,7 @@ class DataRepositoryImpl(DataRepository):
     def load_data_header_from_file(self, *args, **kwargs) -> (np.ndarray, DataHeader):
         return self.__data_manager.load_data_with_header(*args, **kwargs)
 
-    def reindex_numpy(self, data: np.ndarray, index: list, default_value=np.NAN, strict_match=True) -> np.ndarray:
+    def reindex_numpy(self, data: np.ndarray, index: list, default_value=np.nan, strict_match=True) -> np.ndarray:
         shape = data.shape
         if shape[-1] != len(index):
             abort("Data shape not match, %s != %s", shape, len(index))

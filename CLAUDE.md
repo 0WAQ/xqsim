@@ -133,15 +133,14 @@ renaming a provider file means updating every YAML/XML that references it.
   combining cache directories produced by providers. Use it after a `build: true` run
   to validate header consistency and merge an `output_cache_dir` into the production
   `meta_dir`.
-- `prefect_task.py` defines the Prefect flow that orchestrates daily updates.
-  **Note:** the legacy code targets `prefect 0.14.15`, which does not support
-  Python 3.12+. The dependency is currently commented out in `pyproject.toml` —
-  upgrade to Prefect 2.x/3.x before re-enabling.
-- Bring up a local Prefect server with `bash tools/prefect/init_server.sh`,
-  then run an agent under supervisord with `bash tools/prefect/run_agent.sh`
-  (writes `~/supervisor/supervisord.conf`, listens on port 9001). Stand-alone
-  helper flows (not part of the `qsim_data_tools` package) live next to it as
-  `tools/prefect/common.py` and `tools/prefect/csv_flow.py`.
+- `prefect_task.py` defines the Prefect tasks that orchestrate daily updates.
+  Uses Prefect 3.x (`@flow` / `@task` decorators, `get_run_logger()`,
+  `flow.serve(cron=...)` for scheduling, `run_deployment()` for sub-flows).
+- Bring up a local Prefect server with `bash tools/prefect/init_server.sh`
+  (runs `prefect server start` on port 4200), then run a worker under
+  supervisord with `bash tools/prefect/run_agent.sh` (listens on port 9001).
+  Stand-alone flows live next to it as `tools/prefect/common.py` (main
+  production flow) and `tools/prefect/csv_flow.py` (CSV build flow).
 
 ## Tests
 

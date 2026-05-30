@@ -144,5 +144,5 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def reindex_numpy(self, data: np.ndarray, index: list, default_value=np.NAN, strict_match=True) -> np.ndarray:
+    def reindex_numpy(self, data: np.ndarray, index: list, default_value=np.nan, strict_match=True) -> np.ndarray:
         return NotImplemented
