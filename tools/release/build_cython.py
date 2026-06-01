@@ -1,7 +1,7 @@
 import sys
 import os
 import shutil
-from distutils.core import setup
+from setuptools import setup
 from Cython.Build import cythonize
 
 if len(sys.argv) < 2:

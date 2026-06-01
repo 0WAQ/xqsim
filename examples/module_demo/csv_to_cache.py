@@ -34,8 +34,8 @@ if __name__ == '__main__':
     for path in path_list:
         df = pd.read_csv(path, sep="|", header=None)
         # print(df)
-        for index, row in df.iteritems():
-            if row.dtype == np.object:
+        for index, row in df.items():
+            if row.dtype == np.object_:
                 continue
             numpy_list_dict.setdefault(index, []).append(row)
             # print(row)

@@ -34,7 +34,7 @@ class Provider(StaticProvider):
             check_count = 0
 
         log_info("generate universe %s, count should be %s", universe, check_count)
-        buffer = np.full((self.meta.di_size, self.meta.ii_size), False, np.bool)
+        buffer = np.full((self.meta.di_size, self.meta.ii_size), False, np.bool_)
         sql = """
                 SELECT TradingDay, WindCode 
                 FROM meta.Universe_%s 
@@ -73,7 +73,7 @@ class Provider(StaticProvider):
             ii = self.meta.ii_mapping[row["WindCode"]]
             new_buffer[di: di + 10, ii] += 1
         new_buffer = new_buffer[: -10, :]
-        new_buffer_bool = np.full((self.meta.di_size, self.meta.ii_size), False, np.bool)
+        new_buffer_bool = np.full((self.meta.di_size, self.meta.ii_size), False, np.bool_)
         index = new_buffer > 2
         # print(np.where(index))
         new_buffer_bool[index] = True

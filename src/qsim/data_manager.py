@@ -7,7 +7,7 @@ DATA_HEADER_LENGTH = 1024
 
 DATA_TYPE_FILE_DICT = {"float64": "f", "int64": "i", "bool": "b"}
 
-DATA_FILE_TYPE_DICT = {"f": (np.float64, 8), "i": (np.int64, 8), "b": (np.bool, 1)}
+DATA_FILE_TYPE_DICT = {"f": (np.float64, 8), "i": (np.int64, 8), "b": (np.bool_, 1)}
 
 
 class DataHeader(Structure):
