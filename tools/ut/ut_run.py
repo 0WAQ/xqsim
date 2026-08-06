@@ -1,7 +1,7 @@
 import importlib
 import HTMLTestRunner
 import unittest
-from qsim.alpha_base import *
+from xqsim.alpha_base import *
 
 
 class TestLoaderWithKwargs(unittest.TestLoader):

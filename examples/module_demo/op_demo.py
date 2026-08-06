@@ -1,12 +1,12 @@
-from qsim.api import *
+from xqsim.api import *
+import numpy as np
 
-
-class OperationDemo(alphabase.AlphaOperationBase):
+class OperationDemo(OperationBase):
     def __init__(self, *args):
         super(OperationDemo, self).__init__(*args)
 
     def apply(self, didx, alpha):
-        log_info("%s apply %s", self.id, didx)
+        print(f"{self.id} apply {didx}")
         # print(self.parent_module.cfg)
 
 

@@ -283,7 +283,7 @@ Provider 产出写入临时目录（`output_cache_dir`），通过 `update_tools
         <Module id="OpPower" path="./alphaoppower.py" handler="AlphaOpsHandler"/>
         <Module id="OpDecay" path="./alphaopemadecay.py" handler="AlphaOpsHandler"/>
         <Module id="OpNeut" path="./alphaopriskneut.py" handler="AlphaOpsHandler"/>
-        <Module id="Stats" path="${qsim_modules}/stats_general.py" handler="StatsRegistry"/>
+        <Module id="Stats" path="${xqsim_modules}/stats_general.py" handler="StatsRegistry"/>
     </Modules>
 
     <!-- 回测任务: 因子 + Operator链 + Stats -->

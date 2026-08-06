@@ -1,5 +1,7 @@
+import os, sys
+import numpy as np
 import pandas as pd
-from qsim.api import *
+from xqsim.api import *
 
 
 if __name__ == '__main__':
@@ -29,7 +31,7 @@ if __name__ == '__main__':
 
     begin_trading_day = int(os.path.splitext(path_list[0])[1][1:])
     end_trading_day = int(os.path.splitext(path_list[-1])[1][1:])
-    log_info("alpha name: %s, from %s to %s", alpha_name, begin_trading_day, end_trading_day)
+    print(f"alpha name: {alpha_name}, from {begin_trading_day} to {end_trading_day}")
 
     for path in path_list:
         df = pd.read_csv(path, sep="|", header=None)

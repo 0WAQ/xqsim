@@ -1,12 +1,12 @@
-from qsim.api import *
+from xqsim.api import *
+import numpy as np
 
-
-class AlphaOpEmaDecay(alphabase.AlphaOperationBase):
+class AlphaOpEmaDecay(OperationBase):
 
     def __init__(self, *args):
         super(AlphaOpEmaDecay, self).__init__(*args)
 
-        self.days = simcfg.get(self.cfg, 'days', 8)
+        self.days: int = simcfg.get(self.cfg, 'days', 8)    # type: ignore
         self.ema = 2. / (self.days + 1.)
         numInsts = len(univbase.instruments)
         self.hist = np.zeros((numInsts,), dtype=np.float32)
@@ -38,8 +38,9 @@ class AlphaOpEmaDecay(alphabase.AlphaOperationBase):
 
     def archive(self):
         # save hist and init into checkpoint
-        self.ar('hist')
-        self.ar('init')
+        # self.ar('hist')
+        # self.ar('init')
+        ...
 
 
 def create(*args):

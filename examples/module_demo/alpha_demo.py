@@ -1,8 +1,7 @@
-from qsim.api import *
-from test_utils import *
+from xqsim.api import *
 
 
-class AlphaDemo(alphabase.AlphaBase):
+class AlphaDemo(AlphaBase):
 
     def __init__(self, *args):
         super(AlphaDemo, self).__init__(*args)

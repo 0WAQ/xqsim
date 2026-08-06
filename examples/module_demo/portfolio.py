@@ -1,7 +1,7 @@
-from qsim.api import *
+from xqsim.api import *
+import numpy as np
 
-
-class PortfolioSimple(alphabase.PortfolioBase):
+class PortfolioSimple(PortfolioBase):
 
     def __init__(self, *args):
         super(PortfolioSimple, self).__init__(*args)

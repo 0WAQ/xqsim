@@ -1,5 +1,5 @@
 macro:
-  provider_path: "/home/michael/qsim_provider"
+  provider_path: "/home/michael/xqsim_provider"
 
 global:
   meta_dir: "/cc"
@@ -16,5 +16,5 @@ client:
   - "192.168.1.69"
 
 ut:
-  command: "/opt/conda/envs/conda_env/bin/python /home/michael/qsim_tools/ut/ut_run.py"
+  command: "/opt/conda/envs/conda_env/bin/python /home/michael/xqsim_tools/ut/ut_run.py"
   result_path: "/tmp/ut/result.log"

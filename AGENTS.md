@@ -8,11 +8,11 @@ This workspace is a quantitative-simulation stack. The top-level layout is flat:
 the two installable packages live at the repo root, next to a few support directories:
 
 ```
-qsim-py/
+xqsim-py/
 ├── pyproject.toml         # uv-managed project metadata, hatchling build backend
 ├── uv.lock
-├── qsim/                  # core simulator engine (installable package)
-├── qsim_data_tools/       # Prefect flows + update_tools CLI (installable package)
+├── xqsim/                  # core simulator engine (installable package)
+├── xqsim_data_tools/       # Prefect flows + update_tools CLI (installable package)
 ├── providers/             # ProviderBase scripts referenced by absolute path from YAML
 │   ├── *.py               # kline / universe / industry / wind_* / barra / static_provider ...
 │   ├── *.yml              # config_production / config_debug / config_csv / config_single
@@ -47,14 +47,14 @@ YAML configs (`provider:.file_path`) and dynamically imported at run time.
 Requires **Python ≥ 3.12**.
 
 ```bash
-uv sync                 # create .venv, install qsim + qsim_data_tools editable
-uv run qsim --version
+uv sync                 # create .venv, install xqsim + xqsim_data_tools editable
+uv run xqsim --version
 uv run python tools/ut/ut_run.py
 uv add <pkg>            # add a runtime dep (writes to pyproject.toml)
 uv add --dev <pkg>      # dev-only dep
 ```
 
-The Cython release pipeline (Cython-compile most of `qsim/` to `.so`) lives in
+The Cython release pipeline (Cython-compile most of `xqsim/` to `.so`) lives in
 `tools/release/`. `release.sh` calls `build_cython.py`, which uses
 `tools/release/setup/setup.py` to build a wheel of the compiled `.so` files.
 Runtime dependencies are managed by `pyproject.toml`, NOT by this setup.py.
@@ -63,24 +63,24 @@ Python (public API, base classes, entry points). Edit it when adding files
 that must remain importable as source.
 
 Console entry points (declared in `pyproject.toml`):
-- `qsim` → `qsim.qsim_run:main`
-- `stats_general` → `qsim.modules.stats_general:main`
-- `update_tools` → `qsim_data_tools.update_tools:cli`
+- `xqsim` → `xqsim.xqsim_run:main`
+- `stats_general` → `xqsim.modules.stats_general:main`
+- `update_tools` → `xqsim_data_tools.update_tools:cli`
 
 ## Running the simulator
 
 The user-facing flow is config-driven, not code-driven:
 
 ```bash
-uv run qsim -c <config.yml | config.xml>
+uv run xqsim -c <config.yml | config.xml>
 ```
 
-`qsim_run.main` calls `Simulator.init_with_config(path)` which:
+`xqsim_run.main` calls `Simulator.init_with_config(path)` which:
 1. Picks a parser by extension — `.yml` → `common_utils.load_yaml(..., macro=True)`,
    `.xml` → `simulator.load_xml` (the XML parser maps the legacy schema with
    `Universe / Constants / Modules / Portfolio` into the same dict shape as the YAML form).
-2. Substitutes `${...}` macros (the runtime always injects `${qsim_modules}` pointing
-   at the installed `qsim/modules/` dir, plus `${config}` = config-file dir).
+2. Substitutes `${...}` macros (the runtime always injects `${xqsim_modules}` pointing
+   at the installed `xqsim/modules/` dir, plus `${config}` = config-file dir).
 3. Walks four config sections in order — `global` → `provider` → `module` → `alpha` —
    wiring providers, alpha modules, ops, and stats into an `AlphaManager`.
 
@@ -131,8 +131,8 @@ renaming a provider file means updating every YAML/XML that references it.
 **Import shims for external code** — `api.py` re-exports everything from
 `alpha_base` plus `alphabase`; `alphabase.py` re-exports `AlphaBase`,
 `OperationBase` (as `AlphaOperationBase`), and `PortfolioBase`. External
-alphas/modules should import from `qsim.alpha_base` (for `simulator_run` /
-`builder_run`) or `qsim.alphabase` (for the base classes).
+alphas/modules should import from `xqsim.alpha_base` (for `simulator_run` /
+`builder_run`) or `xqsim.alphabase` (for the base classes).
 
 **Binary cache format** — each cache file starts with a 1024-byte C struct
 header (`DataHeader` in `data_manager.py`) encoding `begin_trading_day`,
@@ -141,7 +141,7 @@ followed by the raw numpy data. Providers write via `ProviderBase.write_data` /
 `append_data`; consumers read via `DataRepository.get_data` which returns a
 `DataView` over the mmap'd array.
 
-## Data tools (`qsim_data_tools` + `tools/`)
+## Data tools (`xqsim_data_tools` + `tools/`)
 
 - `update_tools` CLI exposes `show / check / merge / merge_dir` for inspecting and
   combining cache directories produced by providers. Use it after a `build: true` run
@@ -185,7 +185,7 @@ or write a one-off `examples/module_demo/`-style script instead.
   filename next to `static_provider.py`; override per-provider via `mysql_config`
   in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
   replace it locally before pointing at a real DB.
-- The Cython release pipeline means: if you add a new module under `qsim/` that
+- The Cython release pipeline means: if you add a new module under `xqsim/` that
   needs to be importable as source (base class, public API, entry point), add it to
   `copy_only_list` in `tools/release/build_cython.py`. Otherwise it will be shipped
   as a compiled `.so`/`.pyd` only.

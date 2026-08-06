@@ -1,14 +1,13 @@
 import os
-import sys
 import shutil
 import datetime
 
 from prefect import flow, task, get_run_logger
 from prefect.deployments import run_deployment
 
-from qsim import common_utils
-from qsim.qsim_run import init_simulator, init_simulator_with_config_dict
-from qsim_data_tools.prefect_task import (
+from xqsim import common_utils
+from xqsim.xqsim_run import init_simulator, init_simulator_with_config_dict
+from xqsim_data_tools.prefect_task import (
     load_config,
     update_meta,
     init_simulator_and_config,
@@ -16,8 +15,8 @@ from qsim_data_tools.prefect_task import (
     run_merge,
     get_date_with_meta,
 )
-from qsim_data_tools.update_tools import Tools
-from qsim_data_tools.utils import run_shell, get_debug_and_ip
+from xqsim_data_tools.update_tools import Tools
+from xqsim_data_tools.utils import run_shell, get_debug_and_ip
 
 
 @task
@@ -89,7 +88,7 @@ def check_ut(today_date, config_dict):
 def build_common(
     begin_date: str = "TODAY-1",
     end_date: str = "TODAY",
-    config_path: str = None,
+    config_path: str | None = None,
     check: bool = True,
     merge: bool = True,
     build: bool = True,

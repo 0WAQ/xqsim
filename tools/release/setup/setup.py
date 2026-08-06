@@ -2,7 +2,7 @@ import os
 import platform
 from setuptools import find_packages, setup
 
-NAME = 'qsim'
+NAME = 'xqsim'
 DESCRIPTION = 'Simulation'
 URL = ''
 EMAIL = ''
@@ -21,7 +21,7 @@ if platform_system == "Linux":
 elif platform_system == "Windows":
     runtime_platform = "*%s*win*%s*pyd" % (platform_python, platform_machine)
 else:
-    raise "System not support: %s" % platform_system
+    raise Exception(f"System not support: {platform_system}")
 print("Runtime platform:", runtime_platform)
 
 here = os.path.abspath(os.path.dirname(__file__))
@@ -53,7 +53,7 @@ setup(
     packages=find_packages('src'),
     package_dir={'': 'src'},
     entry_points={
-        'console_scripts': ['qsim=qsim.qsim_run:main', 'stats_general=qsim.modules.stats_general:main'],
+        'console_scripts': ['xqsim=xqsim.xqsim_run:main', 'stats_general=xqsim.modules.stats_general:main'],
     },
     package_data={'': ['libmd_subscriber.so', runtime_platform]},
     install_requires=REQUIRED,

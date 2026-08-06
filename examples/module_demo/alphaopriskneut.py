@@ -1,11 +1,11 @@
-from qsim.api import *
+from xqsim.api import *
 import pandas as pd
 import numpy as np
 
 # sys.path.append(".")
 from oper_utils import resid
 
-class OperationDemo(alphabase.AlphaOperationBase):
+class OperationDemo(OperationBase):
     def __init__(self, *args):
         super(OperationDemo, self).__init__(*args)
         self.risk = self.dr.getdata(simcfg.get(self.cfg, 'risk', 'k.close'))
@@ -27,4 +27,4 @@ def create(*args):
     return OperationDemo(*args)
 
 def rank(x):
-    return np.array(pd.Series(x).rank(na_option="keep", pct="true").tolist(), dtype=np.float32)
+    return np.array(pd.Series(x).rank(na_option="keep", pct=True).tolist(), dtype=np.float32)

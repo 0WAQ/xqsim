@@ -27,7 +27,7 @@ wheels/
 MANIFEST
 
 # Cython artefacts produced by tools/release/build_cython.py
-qsim/build_tmp/
+xqsim/build_tmp/
 tools/release/output/
 build_tmp/
 *.c
@@ -61,7 +61,7 @@ coverage.xml
 
 # ---------------------------------------------------------------------
 # Project-specific data caches
-# qsim 把缓存写到 meta_dir / output_cache_dir，体积大且日变，
+# xqsim 把缓存写到 meta_dir / output_cache_dir，体积大且日变，
 # 这些目录不应进 git。
 # ---------------------------------------------------------------------
 # 仅忽略业务数据目录 (Data/), 保留 meta/ (DateIndex/InstrumentIndex 等),

@@ -10,12 +10,12 @@ if len(sys.argv) < 2:
 
 release_dir = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.abspath(os.path.join(release_dir, "..", ".."))
-base_dir = os.path.join(repo_root, "qsim")
+base_dir = os.path.join(repo_root, "xqsim")
 
 ignore_list = {os.path.basename(os.path.abspath(__file__))}
 copy_only_list = {"__init__.py",
                   "version.py",
-                  "qsim_run.py",
+                  "xqsim_run.py",
                   "common_utils.py",
                   "common_module.py",
                   "data_repository.py",
@@ -28,7 +28,7 @@ copy_only_list = {"__init__.py",
 setup_dir = os.path.join(release_dir, "setup")
 tmp_dir = os.path.join(release_dir, "build_tmp")
 output_dir = sys.argv[1]
-build_dir = os.path.join(output_dir, "src/qsim")
+build_dir = os.path.join(output_dir, "src/xqsim")
 
 print("base:", base_dir)
 print("setup:", setup_dir)

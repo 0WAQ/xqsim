@@ -1,8 +1,8 @@
 macro:
-  provider_dir: "./module"
+  provider_dir: "./providers/stocks"
 
 global:
-  meta_dir: "./cc"
+  meta_dir: "./data/stocks/cc"
   output_cache_dir: "${provider_dir}/cc_temp"
   begin_date: "20210901"
   end_date: "20210915"
@@ -28,7 +28,7 @@ module:
     alpha_empty: "${provider_dir}/alpha_empty.py"
 
   stats:
-    stats_general: "${qsim_modules}/stats_general.py"
+    stats_general: "${xqsim_modules}/stats_general.py"
 
 
 alpha:
