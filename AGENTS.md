@@ -1,19 +1,18 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+This file provides guidance to AI Coding Agent when working with code in this repository.
 
 ## Repository layout
 
-This workspace is a quantitative-simulation stack. After the 2026-05 reorganization the
-top-level layout is a single src/ tree plus a few support directories:
+This workspace is a quantitative-simulation stack. The top-level layout is flat:
+the two installable packages live at the repo root, next to a few support directories:
 
 ```
 qsim-py/
 ├── pyproject.toml         # uv-managed project metadata, hatchling build backend
 ├── uv.lock
-├── src/                   # installable Python packages
-│   ├── qsim/              # core simulator engine
-│   └── qsim_data_tools/   # Prefect flows + update_tools CLI
+├── qsim/                  # core simulator engine (installable package)
+├── qsim_data_tools/       # Prefect flows + update_tools CLI (installable package)
 ├── providers/             # ProviderBase scripts referenced by absolute path from YAML
 │   ├── *.py               # kline / universe / industry / wind_* / barra / static_provider ...
 │   ├── *.yml              # config_production / config_debug / config_csv / config_single
@@ -33,7 +32,7 @@ qsim-py/
 │   │   ├── run_agent.sh   # launch supervised prefect agent
 │   │   ├── common.py      # legacy stand-alone Prefect flow helpers
 │   │   └── csv_flow.py
-│   └── release/           # Cython release pipeline (kept separate from src/)
+│   └── release/           # Cython release pipeline (kept separate from the packages)
 │       ├── release.sh
 │       ├── build_cython.py
 │       └── setup/
@@ -44,6 +43,8 @@ qsim-py/
 YAML configs (`provider:.file_path`) and dynamically imported at run time.
 
 ## Install / build (uv)
+
+Requires **Python ≥ 3.12**.
 
 ```bash
 uv sync                 # create .venv, install qsim + qsim_data_tools editable
@@ -127,6 +128,19 @@ Provider configs reference Python files by absolute path (`file_path:
 ${provider_dir}/kline.py`), and the simulator dynamically imports them — moving or
 renaming a provider file means updating every YAML/XML that references it.
 
+**Import shims for external code** — `api.py` re-exports everything from
+`alpha_base` plus `alphabase`; `alphabase.py` re-exports `AlphaBase`,
+`OperationBase` (as `AlphaOperationBase`), and `PortfolioBase`. External
+alphas/modules should import from `qsim.alpha_base` (for `simulator_run` /
+`builder_run`) or `qsim.alphabase` (for the base classes).
+
+**Binary cache format** — each cache file starts with a 1024-byte C struct
+header (`DataHeader` in `data_manager.py`) encoding `begin_trading_day`,
+`end_trading_day`, `di_size`, `ii_size`, `ti_size`, type info, and `adj_mode`,
+followed by the raw numpy data. Providers write via `ProviderBase.write_data` /
+`append_data`; consumers read via `DataRepository.get_data` which returns a
+`DataView` over the mmap'd array.
+
 ## Data tools (`qsim_data_tools` + `tools/`)
 
 - `update_tools` CLI exposes `show / check / merge / merge_dir` for inspecting and
@@ -171,7 +185,7 @@ or write a one-off `examples/module_demo/`-style script instead.
   filename next to `static_provider.py`; override per-provider via `mysql_config`
   in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
   replace it locally before pointing at a real DB.
-- The Cython release pipeline means: if you add a new module under `src/qsim/` that
+- The Cython release pipeline means: if you add a new module under `qsim/` that
   needs to be importable as source (base class, public API, entry point), add it to
   `copy_only_list` in `tools/release/build_cython.py`. Otherwise it will be shipped
   as a compiled `.so`/`.pyd` only.

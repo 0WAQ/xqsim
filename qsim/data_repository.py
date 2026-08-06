@@ -1,6 +1,5 @@
 import abc
 import numpy as np
-import pandas as pd
 from qsim.data_manager import DataHeader, DataManager
 from qsim.meta import Meta, Calendar
 
@@ -66,7 +65,7 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def create_data_view(self, data: np.ndarray, offset_di: int = -1, name: str = None) -> DataView:
+    def create_data_view(self, data: np.ndarray, offset_di: int = -1, name: str | None = None) -> DataView:
         return NotImplemented
 
     @abc.abstractmethod
@@ -97,7 +96,7 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def refresh(self, di=None, ti=None, names: list = None):
+    def refresh(self, di=None, ti=None, names: list | None = None):
         return NotImplemented
 
     @abc.abstractmethod
@@ -105,13 +104,17 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def write_data(self, dir_name: str, data_name: str, data: np.ndarray, begin_trading_day: int = None, end_trading_day: int = None,
-                   data_type: str = DataManager.TYPE_DATA, dimension: str = "", dtype: np.dtype = None, overwrite=False, compress=False):
+    def write_data(self, dir_name: str, data_name: str, data: np.ndarray, 
+                   begin_trading_day: int | None = None, end_trading_day: int | None = None,
+                   data_type: str = DataManager.TYPE_DATA, dimension: str = "", 
+                   dtype: np.dtype | None = None, overwrite=False, compress=False):
         return NotImplemented
 
     @abc.abstractmethod
-    def write_compress_data(self, dir_name: str, data_name: str, data: np.ndarray, begin_trading_day: int = None, end_trading_day: int = None,
-                            data_type: str = DataManager.TYPE_DATA, dimension: str = "", dtype: np.dtype = None, overwrite=False):
+    def write_compress_data(self, dir_name: str, data_name: str, data: np.ndarray, 
+                            begin_trading_day: int | None = None, end_trading_day: int | None = None,
+                            data_type: str = DataManager.TYPE_DATA, dimension: str = "", 
+                            dtype: np.dtype | None = None, overwrite=False):
         return NotImplemented
 
     @abc.abstractmethod
@@ -119,8 +122,10 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def append_data(self, dir_name: str, data_name: str, data: np.ndarray, begin_trading_day: int = None, end_trading_day: int = None,
-                    data_type: str = DataManager.TYPE_DATA, dimension: str = "", dtype: np.dtype = None, part_overwrite=False):
+    def append_data(self, dir_name: str, data_name: str, data: np.ndarray, 
+                    begin_trading_day: int | None = None, end_trading_day: int | None = None,
+                    data_type: str = DataManager.TYPE_DATA, dimension: str = "", 
+                    dtype: np.dtype | None = None, part_overwrite=False):
         return NotImplemented
 
     @abc.abstractmethod
@@ -140,7 +145,7 @@ class DataRepository(abc.ABC):
         return NotImplemented
 
     @abc.abstractmethod
-    def load_data_header_from_file(self, *args, **kwargs) -> (np.ndarray, DataHeader):
+    def load_data_header_from_file(self, *args, **kwargs) -> tuple[np.ndarray, DataHeader]:
         return NotImplemented
 
     @abc.abstractmethod

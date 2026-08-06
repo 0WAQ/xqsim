@@ -8,11 +8,9 @@ if len(sys.argv) < 2:
     print("need output dir")
     exit(0)
 
-# 项目重构后, 源码不在 build_cython.py 同目录, 而在 <repo_root>/src/qsim
-# build_cython.py 现在位于 <repo_root>/tools/release/
 release_dir = os.path.dirname(os.path.abspath(__file__))
 repo_root = os.path.abspath(os.path.join(release_dir, "..", ".."))
-base_dir = os.path.join(repo_root, "src", "qsim")
+base_dir = os.path.join(repo_root, "qsim")
 
 ignore_list = {os.path.basename(os.path.abspath(__file__))}
 copy_only_list = {"__init__.py",

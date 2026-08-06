@@ -2,7 +2,7 @@
 name = "qsim-py"
 version = "1.3.7"
 description = "Quantitative simulation stack: qsim core engine + data providers + Prefect-based data tools."
-readme = "CLAUDE.md"
+readme = "AGENTS.md"
 requires-python = ">=3.12"
 license = { text = "MIT" }
 
@@ -43,15 +43,13 @@ qsim = "qsim.qsim_run:main"
 stats_general = "qsim.modules.stats_general:main"
 update_tools = "qsim_data_tools.update_tools:cli"
 
-# ---------------------------------------------------------------------
-# 单一 src layout 下两个包共享一个 wheel
-# ---------------------------------------------------------------------
+# flat layout
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/qsim", "src/qsim_data_tools"]
+packages = ["./qsim", "./qsim_data_tools"]
 
 [tool.uv]
 package = true
