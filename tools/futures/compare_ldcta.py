@@ -24,6 +24,7 @@
 #   - k.* 为 float64, ldcta 为 float32, 按 float32 精度比对。
 import argparse
 import os
+import sys
 
 import numpy as np
 
@@ -148,6 +149,9 @@ def main():
 
     calendar_path = args.calendar or os.path.join(args.meta, "meta", "index", "DateIndex.csv")
     calendar = load_calendar(calendar_path)
+    # init_dr 会吞掉命令行里 k=v 形式的参数 (init_base_with_cmd 解析 sys.argv),
+    # 与 argparse 冲突, 所以在 parse_args 之后、init_dr 之前截断 sys.argv
+    sys.argv = sys.argv[:1]
     dr = init_dr(meta_dir=args.meta, total=True, index_category="FUTURES")
     xqsim_data = load_xqsim(dr, args.cache)
     if not xqsim_data:
