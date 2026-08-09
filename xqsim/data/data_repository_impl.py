@@ -442,9 +442,17 @@ class DataRepositoryImpl(DataRepository):
             if dir_name == "meta":
                 continue
             base_dir_path = os.path.join(cache_path, dir_name)
+            if not os.path.isdir(base_dir_path):
+                continue
             if not shm:
                 log_info("Find base dir %s", base_dir_path)
-            for data_dir_name in os.listdir(base_dir_path):
+            # 扁平布局 (data_dir 为空, 数据目录直接挂在 cache_path 下, 如期货
+            # cc/Hot/*.dat): base_dir 自身即数据目录; 嵌套布局保持原逻辑
+            if any(os.path.isfile(os.path.join(base_dir_path, f)) for f in os.listdir(base_dir_path)):
+                data_dir_names = [""]
+            else:
+                data_dir_names = os.listdir(base_dir_path)
+            for data_dir_name in data_dir_names:
                 data_dir_path = os.path.join(base_dir_path, data_dir_name)
                 if not os.path.isdir(data_dir_path):
                     continue
@@ -571,8 +579,13 @@ class DataRepositoryImpl(DataRepository):
     # ====================== data manager proxy ======================
 
     def __get_output_dir(self, dir_name, data_type):
-        output_dir = os.path.join(self.meta.get_para("output_cache_dir"), "Data" if data_type == DataManager.TYPE_DATA else "Alpha", dir_name)
-        return output_dir
+        if data_type == DataManager.TYPE_DATA:
+            base_dir = self.__meta.get_para_default("data_dir", "Data")
+        else:
+            base_dir = "Alpha"
+        if base_dir:
+            return os.path.join(self.meta.get_para("output_cache_dir"), base_dir, dir_name)
+        return os.path.join(self.meta.get_para("output_cache_dir"), dir_name)
 
     def write_data(self, dir_name: str, data_name: str, data: np.ndarray, 
                    begin_trading_day: int | None = None, end_trading_day: int | None = None,

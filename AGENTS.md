@@ -21,11 +21,13 @@ xqsim-py/
 │   └── futures/           # 期货 providers (MSSQL 数据源, ldcta 拆分移植)
 │       ├── *.py           # kline / universe / hot / instrument_info / meta_updater /
 │       │                  # mssql_provider(基类) / futures_common(代码换算) / hot_builder(主力判定)
+│       │                  # warehouse / instock / wind_commodity(pi 维) / positions_rank(会员持仓 cube)
 │       ├── config_production.yml
 │       └── mssql.json
 ├── data/                  # 本地数据 (meta 索引等, 不 pip 安装)
 │   ├── stocks/cc/meta/    # 股票 cache index CSVs (DateIndex / InstrumentIndex / ...)
-│   └── futures/           # 期货 meta_dir, 由 providers/futures/meta_updater.py 生成
+│   └── futures/           # 期货 cc: meta/ 与数据目录 (Hot/KLine/...) 扁平同级
+│                          # (config 里 data_dir: "", 无 Data 层); meta 由 meta_updater.py 生成
 ├── examples/              # sample configs and demo modules referenced by configs
 │   ├── sample_config.yml
 │   ├── sample_config.xml
@@ -194,6 +196,9 @@ or write a one-off `examples/module_demo/`-style script instead.
 - `meta_dir` is conventionally `/cc`; provider output goes to `output_cache_dir`
   (often `./cc_update` or `/cc_update`) and is merged into `/cc` by
   `update_tools merge_dir`. Don't write straight into `/cc` from a provider.
+  **期货例外**:`data/futures/cc` 直接作为 `output_cache_dir`,且
+  `data_dir: ""`(扁平布局,数据目录与 `meta/` 同级,无 `Data/` 层);
+  扫描与写出路径都按 `meta` 的 `data_dir` para 走,股票侧默认 `Data` 不变。
 - Date strings `"TODAY-N"` and `"TODAY+N"` are resolved by the loader; pass them
   through configs rather than computing dates in Python.
 - MySQL credentials live in `providers/stocks/mysql.json` (MSSQL for futures:

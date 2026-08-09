@@ -67,6 +67,8 @@ class Simulator(object):
 
         self.__meta = load_meta(self.__base_config)
         self.__meta.set_para("output_cache_dir", simcfg.get(self.__base_config, "output_cache_dir", "./cc_temp"))
+        # 数据目录层名: 默认 "Data" (嵌套布局); 配 "" 则数据目录直接挂在 output_cache_dir 下 (扁平布局, 期货用)
+        self.__meta.set_para("data_dir", simcfg.get(self.__base_config, "data_dir", "Data"))
         self.__meta.set_para("overwrite", simcfg.get(self.__base_config, "overwrite", "append"))
         self.__meta.set_para("save", simcfg.get(self.__base_config, "save", False))
         self.__meta.set_para("save_csv", simcfg.get(self.__base_config, "save_csv", None))

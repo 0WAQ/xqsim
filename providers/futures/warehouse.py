@@ -65,7 +65,7 @@ class Provider(MssqlProvider):
 
 def main():
     builder_run(meta_dir="./data/futures/cc", begin_date="TODAY-5", end_date="TODAY",
-                output_cache_dir="./data/futures/cc_update", index_category="FUTURES")
+                output_cache_dir="./data/futures/cc", index_category="FUTURES", data_dir="")
 
 
 if __name__ == '__main__':

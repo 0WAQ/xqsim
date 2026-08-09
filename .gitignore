@@ -90,3 +90,5 @@ result.log
 .env
 .env.*
 !.env.example
+
+data/

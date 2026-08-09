@@ -2,7 +2,7 @@
 # 代码、以及两侧采样值。
 # 用法: uv run python tools/futures/diagnose_pi.py --tag wh.deliverable \
 #       --ldcta /production/qsim/LDCTA/QNCTACC2026MSSQL/ \
-#       --cache data/futures/cc_update/ --meta data/futures/cc
+#       --cache data/futures/cc/ --meta data/futures/cc
 import argparse
 import os
 import sys

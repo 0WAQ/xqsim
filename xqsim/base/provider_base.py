@@ -10,7 +10,12 @@ class ProviderBase(ModuleBase):
         self.output_cache_dir = self.cfg["output_cache_dir"]
         self.dir_name = self.cfg.get("dir_name", self.id)
 
-        self.output_dir = os.path.join(self.output_cache_dir, DATA_DIR, self.dir_name)
+        # data_dir 为空时数据目录直接挂在 output_cache_dir 下 (扁平布局, 期货用)
+        data_dir = self.meta.get_para_default("data_dir", DATA_DIR)
+        if data_dir:
+            self.output_dir = os.path.join(self.output_cache_dir, data_dir, self.dir_name)
+        else:
+            self.output_dir = os.path.join(self.output_cache_dir, self.dir_name)
 
         self.modify_mode = False
         self.overwrite = False

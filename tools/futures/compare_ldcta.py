@@ -1,13 +1,14 @@
 # 比对 xqsim 期货缓存与 ldcta 原始缓存 (QNCTACC2026MSSQL) 的一致性。
 #
 # 前提: 已跑过 meta_updater.py + config_production.yml (build), 产出在
-#   data/futures/cc_update。两侧日历同源 (CC_Meta_TradingDays_Wind),
-#   按交易日对齐行; 列 (ii) 布局因 pi/slot 分配规则一致而天然对齐。
+#   data/futures/cc (扁平布局, 数据目录与 meta 同级)。两侧日历同源
+#   (CC_Meta_TradingDays_Wind), 按交易日对齐行; 列 (ii) 布局因 pi/slot
+#   分配规则一致而天然对齐。
 #
 # 用法 (repo 根目录):
 #   uv run python tools/futures/compare_ldcta.py \
 #       --ldcta /path/to/QNCTACC2026MSSQL \
-#       --cache data/futures/cc_update \
+#       --cache data/futures/cc \
 #       --meta  data/futures/cc \
 #       [--calendar /path/to/DateIndex.csv | /path/to/Dates.npy]
 #
@@ -183,7 +184,7 @@ def compare_hot_ii(tag: str, mine: np.ndarray, theirs_m80: np.ndarray) -> str:
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--ldcta", required=True, help="ldcta 缓存目录 (QNCTACC2026MSSQL)")
-    parser.add_argument("--cache", required=True, help="xqsim 输出缓存目录 (cc_update)")
+    parser.add_argument("--cache", required=True, help="xqsim 输出缓存目录 (data/futures/cc)")
     parser.add_argument("--meta", required=True, help="xqsim futures meta_dir (data/futures/cc)")
     parser.add_argument("--calendar", default=None,
                         help="行对齐日历: DateIndex.csv 或裸 int64 Dates.npy; 默认 <meta>/meta/index/DateIndex.csv")

@@ -11,7 +11,8 @@
 #   meta/index/DateIndex.csv        di,TradingDay
 #   meta/index/InstrumentIndex.csv  ii,Code,StartDate,EndDate
 #   meta/index/StaticIndexSize.csv  含 FUTURES/4000 行
-#   meta/time_index/ meta/enum/     空目录 (loader 要求存在)
+#   meta/enum/Enum_member.csv       会员 enum (id 只增不改, positions_rank cube 用)
+#   meta/time_index/                空目录 (loader 要求存在)
 #
 # 用法: python meta_updater.py [meta_dir]   (默认 ./data/futures/cc, 需先配好 mssql.json)
 import bisect
@@ -21,7 +22,7 @@ import sys
 
 import pymssql
 
-from futures_common import SLOTS_SIZE, HOT_SLOT, convert_product
+from futures_common import SLOTS_SIZE, HOT_SLOT, convert_product, member_key, load_or_extend_member_enum
 
 II_SIZE = 4000
 FAR_END_DATE = "20891231"
@@ -61,6 +62,8 @@ CONTRACT_SQL = """\
 """
 
 CALENDAR_SQL = "SELECT TradingDay FROM CommonCache.dbo.CC_Meta_TradingDays_Wind ORDER BY TradingDay ASC"
+
+MEMBER_SQL = "SELECT DISTINCT S_INFO_COMPCODE, FS_INFO_MEMBERNAME FROM wind.dbo.CCOMMODITYFUTURESPOSITIONS"
 
 
 def norm_date(date_str: str) -> str:
@@ -169,12 +172,26 @@ class MetaUpdater(object):
             writer.write("0,%s,FUTURES\n" % II_SIZE)
         print("update StaticIndexSize.csv finish")
 
+    def update_member_enum(self):
+        """会员 enum 播种 (positions_rank cube 的 member 字段用);
+        id 只增不改, 重复运行不会重编"""
+        keys = set()
+        for row in self.query(MEMBER_SQL):
+            key = member_key(row[0], row[1])
+            if key:
+                keys.add(key)
+        enum_path = os.path.join(self.meta_dir, "meta", "enum", "Enum_member.csv")
+        os.makedirs(os.path.dirname(enum_path), exist_ok=True)
+        mapping = load_or_extend_member_enum(enum_path, keys)
+        print("update Enum_member.csv finish, %s members" % len(mapping))
+
     def run(self):
         calendar = self.load_calendar()
         print("calendar: %s ~ %s, %s days" % (calendar[0], calendar[-1], len(calendar)))
         self.update_date_index(calendar)
         self.update_instrument_index(calendar)
         self.update_static_size()
+        self.update_member_enum()
         # loader 对 time_index / enum 目录直接 listdir, 必须存在
         os.makedirs(os.path.join(self.meta_dir, "meta", "time_index"), exist_ok=True)
         os.makedirs(os.path.join(self.meta_dir, "meta", "enum"), exist_ok=True)

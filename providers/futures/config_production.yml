@@ -6,7 +6,9 @@ macro:
 
 global:
   meta_dir: "./data/futures/cc"
-  output_cache_dir: "./data/futures/cc_update"
+  output_cache_dir: "./data/futures/cc"
+  # 扁平布局: 数据目录 (Hot/KLine/...) 直接挂在 cc 下与 meta 同级, 不要 Data 层
+  data_dir: ""
   begin_date: "20160101"
   end_date: "TODAY-1"
   build: true
@@ -30,3 +32,5 @@ provider:
     file_path: "${provider_dir}/instock.py"
   WindCommodity:
     file_path: "${provider_dir}/wind_commodity.py"
+  PositionsRank:
+    file_path: "${provider_dir}/positions_rank.py"
