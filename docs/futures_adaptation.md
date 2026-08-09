@@ -182,7 +182,25 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 | `universe.py` | `provider/futures_universe.py` | `uv.all`（活跃合约）+ `static.pi`；不连库 |
 | `hot.py` | `provider/futures_hot.py` | `hot.ii` / `hot.ii_next`（修掉 ldcta 顺序 bug） |
 | `instrument_info.py` | `provider/futures_instrument_info.py` | `static.multiply` / `static.ticksize` |
+| `positions_rank.py` | 新建（ldcta 无对应） | `rk.*` 会员排名 cube（见下） |
 | `config_production.yml` | 新建 | `index_category: FUTURES`、`adj_window: -1` |
+
+### 会员排名 cube（`rk.*`,wind `CCOMMODITYFUTURESPOSITIONS`,2016 年后 top20 时代）
+
+- 布局 `(di, ri, ii)`,ri ∈ [0,20) 对应 rank 1~20，骑在缓存格式现成的 ti 轴
+  机制上（语义借道：ti 轴此处是 rank 不是时间）；lz4 压缩
+- 9 字段：`vol/vol_chg/vol_member`、`long_pos/long_pos_chg/long_pos_member`、
+  `short_pos/short_pos_chg/short_pos_member`（成交量榜/持买单榜/持卖单榜的
+  数量、较上日增减、该名次会员 enum id；三张榜同名次会员不同，member 按榜分开）
+- 数值 float64 缺名次 NaN、member int64 缺名次 -1；不前填；48 号主力槽
+  拷整条 rank 切片
+- 会员身份：compcode 优先、缺失回退 `NAME::会员名`
+  （`futures_common.member_key`);enum 落 `meta/enum/Enum_member.csv`,
+  **id 只增不改**（`futures_common.load_or_extend_member_enum`,meta_updater
+  播种 + provider 运行时追加新会员）
+- 消费：`dr.get_data("rk.long_pos")` → (di, 20, ii) 视图；`meta.enum_index_dict["member"][id]` 反查会员
+- 注意：曾有一版 top20 聚合 provider(`pos.*`）已废弃删除，合计由 cube
+  沿 ri 轴求和 derive，单一事实来源
 
 运行（需 MSSQL 网络，`mssql.json` 已配）：`meta_updater.py` →
 `uv run xqsim -c providers/futures/config_production.yml` →
