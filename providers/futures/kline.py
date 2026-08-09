@@ -2,13 +2,15 @@
 # 数据源: wind.dbo.CCOMMODITYFUTURESEODPRICES (FS_INFO_TYPE=2 商品期货)
 #
 # 语义以 ldcta 生产缓存 (QNCTACC2026MSSQL) 为准——它与 ldcta 当前代码已漂移
-# (生产数据没有 is_valid 闸门和前填逻辑), 实证规则:
-#   - 直通: wind 有行就写原值, 不做任何前填; open/high/low null -> NaN
+# (生产数据不是 is_valid 闸门 + OHLC=昨收 那套), 实证规则:
+#   - 直通: wind 有行就写原值; open/high/low null -> NaN
 #     (无成交日 wind 仍发布 close/settle, OHLC 为空)
 #   - volume/amount/position null -> 0.0 (活跃槽内这三个字段从不为 NaN)
 #   - amount 除以 100 (ldcta 原样)
-#   - preclose = 前一交易日的 close (段首为 NaN; 段 = 合约在槽内的驻留窗口)
-#   - returns: preclose 有效时 close/preclose-1; 否则 close/open-1;
+#   - 前填: 段内 wind 完全无行的日子整行复制上一日 (含 OHLC, 上日为 NaN
+#     则填 NaN), preclose=上一日 close, returns=0; 段首从未有行的日子保持 NaN
+#   - preclose = 前一交易日的 close (段首为 NaN)
+#   - returns: preclose 有效时 close/preclose-1; 段首 close/open-1;
 #     open 也缺则 NaN
 #   - 最后按 hot_builder 的主力映射把主力合约数据拷贝进 48 号槽
 from mssql_provider import MssqlProvider
@@ -78,19 +80,33 @@ class Provider(MssqlProvider):
             code_days.setdefault(code, []).append(di)
             oi_rows.append((trading_day, code, buffer_dict["position"][di][ii]))
 
-        # preclose / returns 派生: 段内逐日错位 (段必连续, 槽位复用段间相隔数年)
+        # preclose / returns 派生 + 无行前填 (生产语义, 实证自 QNCTACC2026MSSQL):
+        # 段内无 wind 行的日子整行复制上一日 (OHLC 也照抄, 上日是 NaN 则填 NaN),
+        # preclose=上一日 close, returns=0; 段首 (从未有行) 保持 NaN
         for code, days in code_days.items():
             ii = self.get_ii(code)
             days.sort()
-            for idx, di in enumerate(days):
-                close = buffer_dict["close"][di][ii]
-                preclose = buffer_dict["close"][days[idx - 1]][ii] if idx > 0 else nan
-                open_ = buffer_dict["open"][di][ii]
-                buffer_dict["preclose"][di][ii] = preclose
-                if not np.isnan(preclose) and preclose != 0 and not np.isnan(close):
-                    buffer_dict["returns"][di][ii] = close / preclose - 1
-                elif not np.isnan(open_) and open_ != 0 and not np.isnan(close):
-                    buffer_dict["returns"][di][ii] = close / open_ - 1
+            row_set = set(days)
+            prev_close = nan
+            di = days[0]
+            while di < self.meta.di_size and self.listed_code(di, ii) == code:
+                if di in row_set:
+                    close = buffer_dict["close"][di][ii]
+                    open_ = buffer_dict["open"][di][ii]
+                    buffer_dict["preclose"][di][ii] = prev_close
+                    if not np.isnan(prev_close) and prev_close != 0 and not np.isnan(close):
+                        buffer_dict["returns"][di][ii] = close / prev_close - 1
+                    elif not np.isnan(open_) and open_ != 0 and not np.isnan(close):
+                        buffer_dict["returns"][di][ii] = close / open_ - 1
+                    if not np.isnan(close):
+                        prev_close = close
+                elif not np.isnan(prev_close):
+                    for name in ("open", "high", "low", "close", "volume",
+                                 "amount", "settle", "position"):
+                        buffer_dict[name][di][ii] = buffer_dict[name][di - 1][ii]
+                    buffer_dict["preclose"][di][ii] = prev_close
+                    buffer_dict["returns"][di][ii] = 0.0
+                di += 1
 
         # 主力合约拷贝进 48 号槽
         hot_map = build_hot_map(oi_rows, self.meta)
