@@ -148,7 +148,7 @@ def main():
 
     calendar_path = args.calendar or os.path.join(args.meta, "meta", "index", "DateIndex.csv")
     calendar = load_calendar(calendar_path)
-    dr = init_dr(meta_dir=args.meta, total=True)
+    dr = init_dr(meta_dir=args.meta, total=True, index_category="FUTURES")
     xqsim_data = load_xqsim(dr, args.cache)
     if not xqsim_data:
         print("no xqsim cache files found in %s" % args.cache)
