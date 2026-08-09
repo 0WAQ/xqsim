@@ -1,5 +1,5 @@
 # 期货主力映射 provider, 移植自 ldcta provider/futures_hot.py。
-# 产出 (int32 di×ii, 默认 -1):
+# 产出 (int64 di×ii, 默认 -1; xqsim 缓存格式只支持 float64/int64/bool):
 #   hot.ii       每个挂牌合约槽当天所属品种的主力合约 ii
 #   hot.ii_next  次主力合约 ii
 # 用法: 判定合约槽 ii 当天是否主力 -> ii == hot.ii[di][ii]
@@ -24,8 +24,8 @@ class Provider(MssqlProvider):
     def generate(self):
         hot_map = build_hot_map(self.fetch_oi_rows(), self.meta)
 
-        hot_ii_buffer = np.full((self.meta.di_size, self.meta.ii_size), -1, np.int32)
-        hot_ii_next_buffer = np.full((self.meta.di_size, self.meta.ii_size), -1, np.int32)
+        hot_ii_buffer = np.full((self.meta.di_size, self.meta.ii_size), -1, np.int64)
+        hot_ii_next_buffer = np.full((self.meta.di_size, self.meta.ii_size), -1, np.int64)
         for di in range(self.meta.di_size):
             if di not in hot_map:
                 continue
