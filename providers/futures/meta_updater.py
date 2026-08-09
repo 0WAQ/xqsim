@@ -150,7 +150,14 @@ class MetaUpdater(object):
                 # xqsim 排他 EndDate = 摘牌日下一交易日; 仍在市的写 20891231
                 next_idx = bisect.bisect_right(calendar, delist_date)
                 end_date = calendar[next_idx] if next_idx < len(calendar) else FAR_END_DATE
-                start_date = max(listed_date, calendar[0])
+                # wind 上市日不一定是交易日 (可能落在假日/日历空洞),
+                # 吸附到第一个 >= 上市日的交易日 (ldcta find_dict_ge 同语义)
+                start_idx = bisect.bisect_left(calendar, listed_date)
+                if start_idx >= len(calendar):
+                    continue
+                start_date = calendar[start_idx]
+                if start_date >= end_date:
+                    continue
                 writer.write("%s,%s,%s,%s\n" % (ii, code, start_date, end_date))
         print("update InstrumentIndex.csv finish")
 
