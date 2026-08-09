@@ -114,9 +114,32 @@ def compare_matrix(tag: str, mine: np.ndarray, theirs: np.ndarray) -> str:
         diff[np.isnan(diff)] = 0
         # 失配按行(交易日)统计, 方便识别 hot 窗口边界效应
         bad_rows = int((~same).any(axis=1).sum())
-        return "%-16s mismatch=%s (days=%s), max abs diff=%.6g" % (
-            tag, n_mismatch, bad_rows, diff.max())
+        ii_idx = np.arange(mine.shape[1]) % SLOTS_SIZE
+        hot_mask = ~same & (ii_idx == HOT_SLOT)[None, :]
+        nan_pattern = ~same & (np.isnan(a) | np.isnan(b)) & ~both_nan
+        return ("%-16s mismatch=%s (days=%s), max abs diff=%.6g\n"
+                "                   breakdown: hot_slot=%s, real_slot=%s, nan_pattern=%s, value_diff=%s"
+                % (tag, n_mismatch, bad_rows, diff.max(),
+                   int(hot_mask.sum()), int((~same & (ii_idx != HOT_SLOT)[None, :]).sum()),
+                   int(nan_pattern.sum()), int((~same & ~nan_pattern).sum())))
     return "%-16s OK (%s cells)" % (tag, mine.size)
+
+
+def detail_mismatch(tag: str, my_days: np.ndarray, mine: np.ndarray,
+                    their_days: np.ndarray, theirs: np.ndarray, dr, n=30):
+    """打印前 n 个失配格子的日期/槽位/两侧值/我方合约码"""
+    common_days = np.intersect1d(my_days, their_days)
+    a = mine[np.searchsorted(my_days, common_days)].astype(np.float32)
+    b = theirs[np.searchsorted(their_days, common_days)].astype(np.float32)
+    same = (a == b) | (np.isnan(a) & np.isnan(b))
+    idx = np.argwhere(~same)[:n]
+    print("%s first %s mismatches (of %s):" % (tag, len(idx), int((~same).sum())))
+    for r, c in idx:
+        day = int(common_days[r])
+        abs_di = dr.meta.total_di_mapping[day]
+        code = dr.meta.instrument_index[abs_di][c] if abs_di in dr.meta.instrument_index else "?"
+        print("  %s ii=%-4s slot=%-2s code=%-10s mine=%-14s theirs=%s"
+              % (day, c, c % SLOTS_SIZE, code, a[r, c], b[r, c]))
 
 
 def compare_hot_ii(tag: str, mine: np.ndarray, theirs_m80: np.ndarray) -> str:
@@ -145,6 +168,8 @@ def main():
     parser.add_argument("--meta", required=True, help="xqsim futures meta_dir (data/futures/cc)")
     parser.add_argument("--calendar", default=None,
                         help="行对齐日历: DateIndex.csv 或裸 int64 Dates.npy; 默认 <meta>/meta/index/DateIndex.csv")
+    parser.add_argument("--detail", default=None, metavar="TAG",
+                        help="打印该 tag 的前 30 个失配格子 (如 k.close)")
     args = parser.parse_args()
 
     calendar_path = args.calendar or os.path.join(args.meta, "meta", "index", "DateIndex.csv")
@@ -172,6 +197,8 @@ def main():
         my_rows = np.searchsorted(my_days, common_days)
         their_rows = np.searchsorted(their_days, common_days)
         print(compare_matrix(tag, my[my_rows], theirs[their_rows]))
+        if args.detail == tag:
+            detail_mismatch(tag, my_days, my, their_days, theirs, dr)
 
     # hot.ii / hot.ii_next 与 ldcta 的 M80 布局单独比对
     for tag, file_name in (("hot.ii", "Hot.hot_ii.M80.i.dat"),
