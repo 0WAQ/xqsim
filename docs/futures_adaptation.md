@@ -212,6 +212,21 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
   无交易品种给 NaN。**以本实现为准**
 - `hot.ii_next` 64814（4.6%）：次主力依赖 ldcta 历史表播种，口径模糊，一期挂起
 
+### pi 维基本面（warehouse / instock / wind_commodity，2026-08-09 补齐）
+
+- 存储约定：pi 维数据**原生 di×80 存储**（缓存格式在 `shape[1] != meta.ii_size`
+  时文件名记为 `M80`，读写/DataView 全链路已验证），消费方 `view.data[:, pi]`
+  直接读取；由 `MssqlProvider.write_pi_data` 落地
+- `wh.*`（仓单 7 字段）/ `istk.*`（交割库存 2 字段，CTAMap join）/
+  `wc.*`（库存 3 字段，CONTPRO join）；`futures_apispot` 废弃（与 warehouse 重复）
+- **ldcta `wind_commodity` 三 buffer 同写 bug 已修**（生产三文件内容相同，实锤；
+  其 `in_stock_total`/`available_in_stock` 无比对价值）
+- ldcta 的硬编码品种剔除名单（LR、SC、NR、LU、BC、PTA）不沿袭：meta 里有的
+  品种统一收录。因此比对时 LR（wh.*）和 PTA（istk.*）列"失配"为预期差异——
+  我方有 wind 真实值（0.0），ldcta 为 NaN，**以本实现为准**
+- 其余字段（wh.on_warrant/available_warehouse/cancelled_warrants、wc.in_stock）
+  零失配
+
 ### 遗留问题
 
 - **数据权威链**：wind（会回溯改历史，wr OHLC 实证）→ 本仓库 provider 代码 →
@@ -223,9 +238,8 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 - `hot_builder` 窗口首日播种与 ldcta 历史表不同（日更小窗口首日主力可能差一天，
   日更建议带几天回看窗口）
 - 死品种 hot 槽语义差异（上表），若下游策略依赖陈旧主力需知悉
-- pi 维基本面（库存/仓单/现货）二期再搬：`futures_instock`/`futures_warehouse`
-  （`futures_wind_commodity_data` 有三 buffer 同写 bug、`futures_apispot` 与
-  warehouse 重复，弃）；进 xqsim 时按约定填在品种 48 号主力槽列
+- pi 维基本面（库存/仓单/现货）已落地（见上节）；若以后扩充到 GFEX/INE/CFFEX
+  品种，注意 ldcta 的剔除名单已废弃，新品种自动收录
 - 夜盘/分钟级、期货版 op/stats：见第 6 节分期
 
 ## 5. 股票 + 期货双资产适配评估
