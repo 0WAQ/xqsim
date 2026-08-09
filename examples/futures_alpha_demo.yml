@@ -1,0 +1,30 @@
+# 期货 demo 因子运行配置 (从 repo 根目录: uv run xqsim -c examples/futures_alpha_demo.yml)
+# 前置: providers/futures 的 build 已跑过 (缓存在 data/futures/cc_update)
+global:
+  meta_dir: "./data/futures/cc"
+  output_cache_dir: "./data/futures/alpha_out"
+  begin_date: "20240101"
+  end_date: "20240801"
+  interval: "day"
+  back_days: 30
+  index_category: FUTURES
+  adj_window: -1
+  cache_list:
+    - "./data/futures/cc_update"
+
+module:
+  alpha:
+    alpha_hot_momentum: "./examples/module_demo_futures/alpha_hot_momentum.py"
+    alpha_inventory: "./examples/module_demo_futures/alpha_inventory.py"
+
+alpha:
+  hot_momentum:
+    module_id: "alpha_hot_momentum"
+    save: true
+    overwrite: "force"
+    n: 20
+  inventory:
+    module_id: "alpha_inventory"
+    save: true
+    overwrite: "force"
+    n: 20
