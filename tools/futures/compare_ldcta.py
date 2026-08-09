@@ -132,8 +132,11 @@ def detail_mismatch(tag: str, my_days: np.ndarray, mine: np.ndarray,
     a = mine[np.searchsorted(my_days, common_days)].astype(np.float32)
     b = theirs[np.searchsorted(their_days, common_days)].astype(np.float32)
     same = (a == b) | (np.isnan(a) & np.isnan(b))
-    idx = np.argwhere(~same)[:n]
-    print("%s first %s mismatches (of %s):" % (tag, len(idx), int((~same).sum())))
+    all_idx = np.argwhere(~same)
+    # 均匀采样 n 个, 避免扎堆在头部掩盖分布
+    pick = np.linspace(0, len(all_idx) - 1, min(n, len(all_idx))).astype(int)
+    idx = all_idx[pick]
+    print("%s sampled %s mismatches (of %s):" % (tag, len(idx), int((~same).sum())))
     for r, c in idx:
         day = int(common_days[r])
         abs_di = dr.meta.total_di_mapping[day]
