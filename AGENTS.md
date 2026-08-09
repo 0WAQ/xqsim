@@ -14,10 +14,18 @@ xqsim-py/
 ├── xqsim/                  # core simulator engine (installable package)
 ├── xqsim_data_tools/       # Prefect flows + update_tools CLI (installable package)
 ├── providers/             # ProviderBase scripts referenced by absolute path from YAML
-│   ├── *.py               # kline / universe / industry / wind_* / barra / static_provider ...
-│   ├── *.yml              # config_production / config_debug / config_csv / config_single
-│   ├── cc/meta/           # cache index CSVs (DateIndex / InstrumentIndex / Calendar ...)
-│   └── mysql.json
+│   ├── stocks/            # A股 providers (MySQL 数据源)
+│   │   ├── *.py           # kline / universe / industry / wind_* / barra / static_provider ...
+│   │   ├── *.yml          # config_production / config_debug / config_csv / config_single
+│   │   └── mysql.json
+│   └── futures/           # 期货 providers (MSSQL 数据源, ldcta 拆分移植)
+│       ├── *.py           # kline / universe / hot / instrument_info / meta_updater /
+│       │                  # mssql_provider(基类) / futures_common(代码换算) / hot_builder(主力判定)
+│       ├── config_production.yml
+│       └── mssql.json
+├── data/                  # 本地数据 (meta 索引等, 不 pip 安装)
+│   ├── stocks/cc/meta/    # 股票 cache index CSVs (DateIndex / InstrumentIndex / ...)
+│   └── futures/           # 期货 meta_dir, 由 providers/futures/meta_updater.py 生成
 ├── examples/              # sample configs and demo modules referenced by configs
 │   ├── sample_config.yml
 │   ├── sample_config.xml
@@ -90,8 +98,15 @@ The same simulator can also be driven from a Python module by calling
 `examples/module_demo/`.
 
 `build: true` in `global:` short-circuits after providers run — useful for refreshing
-the cache without simulating. See `providers/config_production.yml` for the canonical
+the cache without simulating. See `providers/stocks/config_production.yml` for the canonical
 "build only" config.
+
+Futures side: generate meta first (`uv run python providers/futures/meta_updater.py
+./data/futures/cc`, needs MSSQL access + `providers/futures/mssql.json`), then
+`uv run xqsim -c providers/futures/config_production.yml` (needs `index_category: FUTURES`
++ `adj_window: -1`, already in that config). Consistency against the legacy ldcta cache
+is verified with `tools/futures/compare_ldcta.py`; semantics and validation results are
+documented in `docs/futures_adaptation.md` §4.1.
 
 ## Architectural anchors
 
@@ -181,7 +196,8 @@ or write a one-off `examples/module_demo/`-style script instead.
   `update_tools merge_dir`. Don't write straight into `/cc` from a provider.
 - Date strings `"TODAY-N"` and `"TODAY+N"` are resolved by the loader; pass them
   through configs rather than computing dates in Python.
-- MySQL credentials live in `providers/mysql.json`. Providers default to that
+- MySQL credentials live in `providers/stocks/mysql.json` (MSSQL for futures:
+  `providers/futures/mssql.json`). Providers default to that
   filename next to `static_provider.py`; override per-provider via `mysql_config`
   in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
   replace it locally before pointing at a real DB.

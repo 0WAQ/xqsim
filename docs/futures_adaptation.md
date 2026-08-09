@@ -23,7 +23,8 @@
 引擎入口已通（`uv sync` + `uv run xqsim --version`），跑起来还需：
 
 1. **meta 索引**：`meta_dir` 下要有 `meta/index/{DateIndex,InstrumentIndex,StaticIndexSize}.csv`。
-   仓库现成一份在 `providers/cc/meta/`（股票全市场），放/软链到 `meta_dir` 指向处。
+   仓库现成一份股票全市场的在 `data/stocks/cc/meta/`，放/软链到 `meta_dir` 指向处；
+   期货侧由 `providers/futures/meta_updater.py` 生成到 `data/futures/cc/meta/`。
 2. **sample 配置路径**：`examples/sample_config.yml` 假设工作目录有 `./module` 和 `./cc`，
    是旧布局遗留；要么搭 staging 目录做软链，要么改配置里的 `provider_dir` 宏。
 3. **数据源凭证**：kline/universe provider 从 MySQL 抽数，`providers/mysql.json` 是占位符；
@@ -166,6 +167,66 @@ ldcta 无活跃下游需要照顾（2026-08-08 确认）。
 
 注意：ldcta 的 MSSQL 连接串含明文凭证，移植时用 xqsim 的 `mysql_config`
 同款外置配置文件机制，不入库。
+
+## 4.1 一期实施结果（2026-08-09，已落地并通过比对）
+
+ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
+
+| 文件 | 来源 | 产出 |
+|---|---|---|
+| `futures_common.py` | ldcta `base.py` 纯函数 | wind码→标准码换算、槽位常量 |
+| `mssql_provider.py` | 新建基类（仿 stocks `static_provider.py`） | `exec_sql_fetchall` / `get_ii` / `listed_code` / `fetch_oi_rows` |
+| `meta_updater.py` | `builder/futures_ii.py` | 直接落 meta CSV，砍掉 MSSQL 中间表；**EndDate = 摘牌日下一交易日**；StartDate 吸附到首个 ≥ 上市日的交易日（wind 上市日不一定是交易日） |
+| `hot_builder.py` | `builder/futures_hot.py` | 主力判定内存计算：持仓排序 + 不回退 + 1.1x 滞回；砍掉 hot 表往返 |
+| `kline.py` | `provider/futures_kdata.py` | `k.open/high/low/close/volume/amount/settle/position/preclose/returns` + 48 号主力槽拷贝 |
+| `universe.py` | `provider/futures_universe.py` | `uv.all`（活跃合约）+ `static.pi`；不连库 |
+| `hot.py` | `provider/futures_hot.py` | `hot.ii` / `hot.ii_next`（修掉 ldcta 顺序 bug） |
+| `instrument_info.py` | `provider/futures_instrument_info.py` | `static.multiply` / `static.ticksize` |
+| `config_production.yml` | 新建 | `index_category: FUTURES`、`adj_window: -1` |
+
+运行（需 MSSQL 网络，`mssql.json` 已配）：`meta_updater.py` →
+`uv run xqsim -c providers/futures/config_production.yml` →
+`tools/futures/compare_ldcta.py` 比对。
+
+### kline 语义（实证自 ldcta 生产缓存，与 ldcta 当前代码已漂移）
+
+**ldcta 生产缓存 ≠ ldcta 仓库代码**（生产是「直通+整行前填」，代码是
+「is_valid 闸门+OHLC=昨收前填」——代码漂移，语义以生产数据为准）：
+
+- 直通：wind 有行写原值；OHLC null → NaN（无成交日 wind 仍发布 close/settle）
+- volume/amount/position null → 0.0；amount ÷ 100
+- 前填：段内 wind 完全无行的日子**整行复制上一日**（含 OHLC，上日 NaN 则填 NaN），
+  preclose=上一日 close，returns=0；段首从未有行的日子保持 NaN
+- preclose = 前一日 close（段首 NaN）；returns = close/preclose-1，
+  段首 close/open-1，open 也缺则 NaN
+
+### 全量比对结果（20160104~20260807，2574 天 × 4000 槽）
+
+- `uv.all`、`k.close/settle/volume/amount/position`、`static.multiply/ticksize`
+  真实槽：**零失配**
+- `k.preclose`/`k.returns`：真实槽各 5 格边角
+- `k.open/high/low`：真实槽 500 格，全部是强麦（wr）2018-09~2019-01 段——
+  wind 对死品种历史行做过回溯清理，生产缓存是当年快照，**不可复现，以新数据为准**
+- hot 槽 ~6000 格 + `hot.ii` 1839（0.13%）：生产 hot 表对停牌/退市品种
+  （bb/JR/PM/RI/ZC 等）保留陈旧主力并每天拷贝旧值；本实现重算主力、
+  无交易品种给 NaN。**以本实现为准**
+- `hot.ii_next` 64814（4.6%）：次主力依赖 ldcta 历史表播种，口径模糊，一期挂起
+
+### 遗留问题
+
+- **数据权威链**：wind（会回溯改历史，wr OHLC 实证）→ 本仓库 provider 代码 →
+  xqsim 缓存，每环可全量重放。ldcta 生产缓存是十年增量构建的化石
+  （当时 wind 快照 × 当时代码版本 × 当时 hot 表状态），不再作为语义依据
+- **增量路径未验证**：目前只跑过全量重建；`TODAY-10` 小窗口日更有两个已知
+  薄弱点——hot 窗口首日播种差异、`do_generate` 目录存在即静默跳过。
+  首次日更后应对当天数据跑一次 compare_ldcta 确认与全量一致
+- `hot_builder` 窗口首日播种与 ldcta 历史表不同（日更小窗口首日主力可能差一天，
+  日更建议带几天回看窗口）
+- 死品种 hot 槽语义差异（上表），若下游策略依赖陈旧主力需知悉
+- pi 维基本面（库存/仓单/现货）二期再搬：`futures_instock`/`futures_warehouse`
+  （`futures_wind_commodity_data` 有三 buffer 同写 bug、`futures_apispot` 与
+  warehouse 重复，弃）；进 xqsim 时按约定填在品种 48 号主力槽列
+- 夜盘/分钟级、期货版 op/stats：见第 6 节分期
 
 ## 5. 股票 + 期货双资产适配评估
 

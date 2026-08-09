@@ -24,3 +24,9 @@ provider:
     file_path: "${provider_dir}/kline.py"
   InstrumentInfo:
     file_path: "${provider_dir}/instrument_info.py"
+  Warehouse:
+    file_path: "${provider_dir}/warehouse.py"
+  InStock:
+    file_path: "${provider_dir}/instock.py"
+  WindCommodity:
+    file_path: "${provider_dir}/wind_commodity.py"

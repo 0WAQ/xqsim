@@ -52,6 +52,22 @@ LDCTA_MAX_INT = 2147483647
 SLOTS_SIZE = 50
 HOT_SLOT = 48
 
+# pi 维字段: xqsim 侧值在各品种 48 号主力槽列 (di×ii), ldcta 侧是 di×80
+PI_FIELD_MAP = {
+    "wh.deliverable": ("Warehouse", "Warehouse.deliverable.M80.f.dat"),
+    "wh.on_warrant": ("Warehouse", "Warehouse.on_warrant.M80.f.dat"),
+    "wh.available_warehouse": ("Warehouse", "Warehouse.available_warehouse.M80.f.dat"),
+    "wh.in": ("Warehouse", "Warehouse.warehouse_in.M80.f.dat"),
+    "wh.out": ("Warehouse", "Warehouse.warehouse_out.M80.f.dat"),
+    "wh.cancelled_warrants": ("Warehouse", "Warehouse.cancelled_warrants.M80.f.dat"),
+    "wh.effective_forecast": ("Warehouse", "Warehouse.effective_forecast.M80.f.dat"),
+    "istk.instock": ("CFUTURESINSTOCKA", "CFUTURESINSTOCKA.instock.M80.f.dat"),
+    "istk.avail_instock": ("CFUTURESINSTOCKA", "CFUTURESINSTOCKA.avail_instock.M80.f.dat"),
+    "wc.in_stock": ("Wind_CommodityData", "Wind_CommodityData.in_stock.M80.f.dat"),
+    # 注: ldcta 的 wc.in_stock_total / wc.available_in_stock 因上游 bug
+    # (三个 save_dat 同写 in_stock_buffer) 与 in_stock 完全相同, 无比对价值
+}
+
 
 def load_calendar(path: str) -> np.ndarray:
     """交易日历: DateIndex.csv (第二列 yyyymmdd) 或裸 int64 二进制 (Dates.npy 格式)"""
@@ -88,7 +104,7 @@ def load_xqsim(dr, cache_dir: str) -> dict[str, tuple[np.ndarray, np.ndarray]]:
             if len(elements) < 4:
                 continue
             tag = ".".join(elements[:-3])
-            if tag not in FIELD_MAP and not tag.startswith("hot."):
+            if tag not in FIELD_MAP and tag not in PI_FIELD_MAP and not tag.startswith("hot."):
                 continue
             data, header = dr.load_data_header_from_file(os.path.join(dir_path, file_name), total=True)
             begin_di = dr.meta.total_di_mapping[int(header.begin_trading_day)]
@@ -202,6 +218,23 @@ def main():
         print(compare_matrix(tag, my[my_rows], theirs[their_rows]))
         if args.detail == tag:
             detail_mismatch(tag, my_days, my, their_days, theirs, dr)
+
+    # pi 维字段: 我方取各品种 48 号主力槽列 (di×80), 与对方 M80 直接比
+    for tag, (dir_name, file_name) in sorted(PI_FIELD_MAP.items()):
+        if tag not in xqsim_data:
+            print("%-24s MISSING in xqsim cache" % tag)
+            continue
+        ldcta_path = os.path.join(args.ldcta, dir_name, file_name)
+        if not os.path.exists(ldcta_path):
+            print("%-24s ldcta file missing: %s" % (tag, ldcta_path))
+            continue
+        my_days, my = xqsim_data[tag]
+        their_days, theirs = load_ldcta(ldcta_path, calendar)
+        common_days = np.intersect1d(my_days, their_days)
+        my_rows = np.searchsorted(my_days, common_days)
+        their_rows = np.searchsorted(their_days, common_days)
+        my_pi = my[my_rows][:, HOT_SLOT::SLOTS_SIZE]
+        print(compare_matrix(tag, my_pi, theirs[their_rows]))
 
     # hot.ii / hot.ii_next 与 ldcta 的 M80 布局单独比对
     for tag, file_name in (("hot.ii", "Hot.hot_ii.M80.i.dat"),

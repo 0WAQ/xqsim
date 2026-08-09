@@ -5,7 +5,7 @@ import json
 import pymssql
 from xqsim.common_module import *
 from xqsim.base.provider_base import ProviderBase
-from futures_common import convert_to_standard_code
+from futures_common import convert_to_standard_code, SLOTS_SIZE, HOT_SLOT
 
 OI_SQL = """\
     SELECT S_INFO_WINDCODE, TRADE_DT, S_DQ_OI
@@ -53,6 +53,23 @@ class MssqlProvider(ProviderBase):
         """offset di 上槽位 ii 驻留的合约码, 空槽返回 ""
         注意 instrument_index 的键是绝对 di (begin_di + offset)"""
         return self.meta.instrument_index[self.meta.begin_di + di][ii]
+
+    def get_pi(self, product: str) -> int | None:
+        """品种码 -> pi (经 8888 主力槽行反查 ii_mapping), 兼容大小写变体;
+        未收录品种 (非 CZCE/DCE/SHFE) 返回 None"""
+        for variant in (product, product.lower(), product.upper()):
+            ii = self.meta.ii_mapping.get(variant + "8888")
+            if ii is not None:
+                return ii // SLOTS_SIZE
+        return None
+
+    def write_pi_data(self, tag: str, pi_values: np.ndarray):
+        """pi 维 (di, pi_size) 数据写进 ii 空间: 值放在该品种 48 号主力槽列,
+        其余列 NaN。消费方按 ii = pi*50+48 列读取"""
+        data = np.full((self.meta.di_size, self.meta.ii_size), nan, np.float64)
+        pi_size = self.meta.ii_size // SLOTS_SIZE
+        data[:, HOT_SLOT::SLOTS_SIZE] = pi_values[:, :pi_size]
+        self.write_data(tag, data)
 
     def fetch_oi_rows(self) -> list:
         """拉取持仓量序列供主力判定: [(trading_day:int, code:str, oi:float)]"""
