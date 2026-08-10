@@ -29,7 +29,6 @@ xml_dict = eval(data)
 `${...}`），不经过 str/eval 这一遭。
 
 ### 3. load_xml 单个 Module 时崩溃 — line 113
-
 ```python
 for module_dict in xml_dict["Modules"]["Module"]:
 ```
@@ -72,6 +71,20 @@ MODULE_TYPE pop "stats"），大写 key 无任何消费者，是随 cfg 传入 `
 被 checkpoint 多序列化一份的死重量。
 
 修法方向：两个分支处理完各补 `continue`（修时注意与第 4 条的 None 判断一起改）。
+
+## dynamic_save_csv 默认 None 屏蔽 alpha 级 save_csv — simulator.py / alpha_manager.py
+
+`init_base` 无条件执行 `set_para("dynamic_save_csv", simcfg.get(base_config,
+"dynamic_save_csv", None))`——配置里不写时 para 键存在但值为 `None`。
+`AlphaTask.save_csv` 第一行 `get_para_default("dynamic_save_csv",
+self.__alpha.save_csv_dir)` 因键已存在返回 `None`，直接 return。
+
+后果：alpha 配置里的 `save_csv="csv"` 被静默忽略，不产出任何 csv
+（2026-08-09 跑 AlphaWbaiHotMomentum 实证）。因子 `.fac` 文件保存
+（`save="true"`）不受影响。
+
+修法方向：`init_base` 只在配置显式给出时才 `set_para`（或默认 `""` 并在
+save_csv 侧把 None 当未配置处理）。
 
 ## 备注
 

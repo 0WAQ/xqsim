@@ -241,9 +241,13 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 - `hot_builder` 窗口首日播种与 ldcta 历史表不同（日更小窗口首日主力可能差一天，
   日更建议带几天回看窗口）
 - 死品种 hot 槽语义差异（上表），若下游策略依赖陈旧主力需知悉
-- pi 维基本面（库存/仓单/现货）二期再搬：`futures_instock`/`futures_warehouse`
-  （`futures_wind_commodity_data` 有三 buffer 同写 bug、`futures_apispot` 与
-  warehouse 重复，弃）；进 xqsim 时按约定填在品种 48 号主力槽列
+- **`stats_general` 是股票口径，期货不可用**：其 `__init__` 无条件加载
+  `k.vwap/k.value/k.ret/k.upper/k.lower`（期货只有 `k.returns`，无 vwap/value/
+  涨跌停字段），配置引用即 abort（2026-08-09 跑 AlphaWbaiHotMomentum 实证，
+  demo 配置已注释掉 Stats）。期货版 stats（名义本金口径：Δ价×乘数×手数）
+  见第 6 节分期，是一期最后的大块
+- ~~pi 维基本面（库存/仓单/现货）二期再搬~~ 已在一期完成（di×80 直写，
+  见 §4.1 表格与比对结论）；`futures_apispot` 弃
 - 夜盘/分钟级、期货版 op/stats：见第 6 节分期
 
 ## 5. 股票 + 期货双资产适配评估

@@ -447,11 +447,15 @@ class DataRepositoryImpl(DataRepository):
             if not shm:
                 log_info("Find base dir %s", base_dir_path)
             # 扁平布局 (data_dir 为空, 数据目录直接挂在 cache_path 下, 如期货
-            # cc/Hot/*.dat): base_dir 自身即数据目录; 嵌套布局保持原逻辑
-            if any(os.path.isfile(os.path.join(base_dir_path, f)) for f in os.listdir(base_dir_path)):
+            # cc/Hot/*.dat): base_dir 自身即数据目录; 嵌套布局保持原逻辑。
+            # 判定: 直接含数据文件, 或含 YYYYMMDD 日目录 (compress 数据的
+            # TYPE_DIR 形态, 如 cc/PositionsRank/20180522/*.datlz4)
+            entries = os.listdir(base_dir_path)
+            if any(os.path.isfile(os.path.join(base_dir_path, f)) for f in entries) or \
+                    any(len(e) == 8 and e.isdigit() and os.path.isdir(os.path.join(base_dir_path, e)) for e in entries):
                 data_dir_names = [""]
             else:
-                data_dir_names = os.listdir(base_dir_path)
+                data_dir_names = entries
             for data_dir_name in data_dir_names:
                 data_dir_path = os.path.join(base_dir_path, data_dir_name)
                 if not os.path.isdir(data_dir_path):
