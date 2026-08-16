@@ -2,6 +2,7 @@ from xqsim.base.alpha_base import AlphaBase
 from xqsim.base.alpha_base import PortfolioBase
 from xqsim.base.operation_base import OperationBase
 from xqsim.base.provider_base import ProviderBase
+from xqsim.base.stats_base import StatsBase
 from xqsim.base.module_base import simcfg
 from xqsim.base.module_base import univbase
 from xqsim.data.data_repository import DataRepository

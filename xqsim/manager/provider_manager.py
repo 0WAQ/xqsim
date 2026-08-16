@@ -15,6 +15,13 @@ class ProviderManager(object):
         config["file_path"] = file_path
 
         cls = common_utils.getattr_fromfile(config["file_path"], "Provider")
+        if cls is None:
+            cls = common_utils.getattr_fromfile(config["file_path"], "create")
+        if cls is None:
+            abort(
+                "No class Provider or create func in file %s",
+                config["file_path"],
+            )
         obj: ProviderBase = cls(self.__dr, config)
         self.__provider_list.append(obj)
         log_info("ProviderManager add provider: %s, file_path: %s", config["id"], config["file_path"])

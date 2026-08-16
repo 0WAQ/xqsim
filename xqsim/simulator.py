@@ -31,9 +31,19 @@ def dictify(r, root=True):
 class Simulator(object):
     def __init__(self):
         self.__xqsim_path = os.path.abspath(os.path.dirname(__file__))
+        self.__xqsim_home = common_utils.realpath(
+            os.environ.get("XQSIM_HOME", "/usr/local/xqsim")
+        )
         self.__macro_dict = {
-            "xqsim_modules": os.path.join(self.__xqsim_path, "modules").replace("\\", "/")
+            "xqsim_modules": os.path.join(
+                self.__xqsim_path, "modules"
+            ).replace("\\", "/"),
+            "xqsim_home": self.__xqsim_home.replace("\\", "/"),
         }
+        for module_type in ("alpha", "operation", "stats", "provider", "config"):
+            self.__macro_dict["xqsim_" + module_type] = os.path.join(
+                self.__xqsim_home, module_type
+            ).replace("\\", "/")
 
         self.__base_config: dict
         self.__dr: DataRepositoryImpl
@@ -57,6 +67,7 @@ class Simulator(object):
 
         log_info("Simulator created with version %s, pid is %s", VERSION, os.getpid())
         log_info("QSim path %s", self.__xqsim_path)
+        log_info("XQSim home %s", self.__xqsim_home)
 
         self.__base_config = base_config
 

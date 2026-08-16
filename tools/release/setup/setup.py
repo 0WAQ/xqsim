@@ -1,71 +1,48 @@
-import os
-import platform
-from setuptools import find_packages, setup
+"""PEP 517 build definition copied into the generated release staging tree."""
 
-NAME = 'xqsim'
-DESCRIPTION = 'Simulation'
-URL = ''
-EMAIL = ''
-AUTHOR = ''
-REQUIRES_PYTHON = '>=3.6.0'
+import json
+from pathlib import Path
 
-EXTRAS = {
+from Cython.Build import cythonize
+from setuptools import Extension, find_packages, setup
 
-}
 
-platform_python = platform.python_version_tuple()[0] + platform.python_version_tuple()[1]
-platform_machine = platform.uname().machine.lower()
-platform_system = platform.uname().system
-if platform_system == "Linux":
-    runtime_platform = "*%s*%s*linux*so" % (platform_python, platform_machine)
-elif platform_system == "Windows":
-    runtime_platform = "*%s*win*%s*pyd" % (platform_python, platform_machine)
-else:
-    raise Exception(f"System not support: {platform_system}")
-print("Runtime platform:", runtime_platform)
+ROOT = Path(__file__).resolve().parent
+METADATA = json.loads((ROOT / "release_metadata.json").read_text(encoding="utf-8"))
+COMPILED_MODULES = METADATA["compiled_modules"]
 
-here = os.path.abspath(os.path.dirname(__file__))
 
-# 依赖管理已迁移到 <repo_root>/pyproject.toml; 这个 setup.py 只负责把
-# Cython 编译产出的 .so 打成 wheel, 不再读 requirements.txt.
-REQUIRED = []
+def module_source(module_name: str) -> str:
+    return str(Path("cython_src", *module_name.split(".")).with_suffix(".py"))
 
-try:
-    with open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
-        long_description = '\n' + f.read()
-except FileNotFoundError:
-    long_description = DESCRIPTION
 
-about = {}
-with open(os.path.join(here, 'src', NAME, 'version.py')) as f:
-    exec(f.read(), about)
+extensions = [
+    Extension(module_name, [module_source(module_name)])
+    for module_name in COMPILED_MODULES
+]
 
 setup(
-    name=NAME,
-    version=about['__version__'],
-    description=DESCRIPTION,
-    long_description=long_description,
-    long_description_content_type='text/markdown',
-    author=AUTHOR,
-    author_email=EMAIL,
-    python_requires=REQUIRES_PYTHON,
-    url=URL,
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
+    name="xqsim",
+    version=METADATA["version"],
+    description=METADATA["description"],
+    python_requires=METADATA["requires_python"],
+    install_requires=METADATA["dependencies"],
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    ext_modules=cythonize(
+        extensions,
+        compiler_directives={
+            "language_level": 3,
+            "binding": True,
+            "embedsignature": True,
+        },
+    ),
     entry_points={
-        'console_scripts': ['xqsim=xqsim.xqsim_run:main', 'stats_general=xqsim.modules.stats_general:main'],
+        "console_scripts": [
+            "xqsim=xqsim.xqsim_run:main",
+            "stats_general=xqsim.modules.stats_general:main",
+        ]
     },
-    package_data={'': ['libmd_subscriber.so', runtime_platform]},
-    install_requires=REQUIRED,
-    extras_require=EXTRAS,
     include_package_data=False,
-    license='MIT',
-    classifiers=[
-        # Trove classifiers
-        # Full list: https://pypi.python.org/pypi?%3Aaction=list_classifiers
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6'
-    ],
+    license="MIT",
 )

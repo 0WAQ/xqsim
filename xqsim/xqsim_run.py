@@ -1,5 +1,5 @@
 import os
-import getopt
+import argparse
 from xqsim.version import VERSION
 from xqsim.dbg import *
 from xqsim.simulator import Simulator
@@ -41,27 +41,61 @@ def init_dr(**kwargs):
     return simulator.dr
 
 
-def show_menu():
-    print("Usage: xxxx.py -c config.config")
+MODULE_EXPORTS = {
+    "alpha": "Alpha",
+    "operation": "Operation",
+    "stats": "Stats",
+    "provider": "Provider",
+}
+
+
+def _check_external_modules(module_specs):
+    for module_type, file_path in module_specs:
+        export_name = MODULE_EXPORTS.get(module_type.lower())
+        if export_name is None:
+            raise ValueError(
+                "unsupported module type %r; expected one of %s"
+                % (module_type, ", ".join(sorted(MODULE_EXPORTS)))
+            )
+        file_path = common_utils.realpath(file_path)
+        module = common_utils.dynamic_import(file_path)
+        exported = getattr(module, export_name, None)
+        if exported is None:
+            exported = getattr(module, "create", None)
+        if exported is None:
+            raise AttributeError(
+                "%s must export %s or create" % (file_path, export_name)
+            )
+        print(
+            "checked %s module %s sha256=%s"
+            % (module_type.lower(), file_path, module.__xqsim_source_sha256__)
+        )
 
 
 def get_config_path():
-    opts, args = getopt.getopt(sys.argv[1:], "-v-c:", ["version", "config="])
+    parser = argparse.ArgumentParser(prog="xqsim")
+    parser.add_argument("-v", "--version", action="store_true")
+    parser.add_argument("-c", "--config")
+    parser.add_argument(
+        "--check-module",
+        nargs=2,
+        action="append",
+        metavar=("TYPE", "FILE"),
+        help="validate an external alpha/operation/stats/provider module",
+    )
+    args = parser.parse_args()
 
-    config_path = None
+    if args.version:
+        print("version is", VERSION)
+        sys.exit()
+    if args.check_module:
+        _check_external_modules(args.check_module)
+        sys.exit()
+    if args.config is None:
+        parser.error("-c/--config is required")
 
-    for o, a in opts:
-        if o in ("-v", "--version"):
-            print("version is", VERSION)
-            sys.exit()
-        if o in ("-c", "--config"):
-            config_path = a
-
-    if config_path is None:
-        show_menu()
-        exit(1)
     log_info("Current work dir is %s", os.getcwd())
-    config_path = common_utils.realpath(config_path)
+    config_path = common_utils.realpath(args.config)
     log_info("Config path is %s", config_path)
     return config_path
 

@@ -46,9 +46,19 @@ xqsim-py/
 │   │   └── csv_flow.py
 │   └── release/           # Cython release pipeline (kept separate from the packages)
 │       ├── release.sh
-│       ├── build_cython.py
+│       ├── build_cython.py        # stage + PEP 517 wheel build + artifact manifest
+│       ├── build_executable.py    # freeze installed binary wheel into one ELF
+│       ├── executable_main.py     # PyInstaller entry point
+│       ├── executable_smoke_test.py # external-module + CLI gate
+│       ├── release_manifest.py    # explicit source / compiled / excluded modules
+│       ├── verify_wheel.py        # static wheel-content gate
+│       ├── smoke_test.py          # installed-wheel import gate
+│       ├── publish_release.py     # immutable executable releases under install root
+│       ├── activate_release.py    # atomic executable switch / rollback
+│       ├── PUBLIC_MODULES.md      # deployed researcher-facing module contract
+│       ├── README.md
 │       └── setup/
-│           └── setup.py   # wheel-only setup; runtime deps live in pyproject.toml
+│           └── setup.py           # generated-stage PEP 517 build definition
 ```
 
 `providers/` files are NOT pip-installed — they are referenced as absolute paths from
@@ -59,20 +69,31 @@ YAML configs (`provider:.file_path`) and dynamically imported at run time.
 Requires **Python ≥ 3.12**.
 
 ```bash
-uv sync                 # create .venv, install xqsim + xqsim_data_tools editable
+uv sync                 # core runtime dependencies
+uv sync --all-extras    # full contributor env: data tools, providers, release, dev
 uv run xqsim --version
 uv run python tools/ut/ut_run.py
 uv add <pkg>            # add a runtime dep (writes to pyproject.toml)
 uv add --dev <pkg>      # dev-only dep
 ```
 
-The Cython release pipeline (Cython-compile most of `xqsim/` to `.so`) lives in
-`tools/release/`. `release.sh` calls `build_cython.py`, which uses
-`tools/release/setup/setup.py` to build a wheel of the compiled `.so` files.
-Runtime dependencies are managed by `pyproject.toml`, NOT by this setup.py.
-The `copy_only_list` in `build_cython.py` controls which files stay as plain
-Python (public API, base classes, entry points). Edit it when adding files
-that must remain importable as source.
+The researcher-facing release is one Linux ELF at `/usr/local/xqsim/xqsim`.
+`release.sh` first builds the Cython platform wheel as an internal artifact,
+installs it in a clean venv, then freezes CPython, dependencies, and the compiled
+core with PyInstaller. It starts the resulting ELF and loads same-named external
+Alpha/Operation/Stats/Provider files before publication. Published versions are
+immutable under `/usr/local/xqsim/releases/<version>/`; the root `xqsim` symlink
+is the atomic activation and rollback point.
+
+`tools/release/release_manifest.py` is the authoritative explicit boundary:
+every module under `xqsim/` must be listed as source, compiled, or excluded.
+An unclassified module fails the build. Runtime dependencies come from
+`pyproject.toml`; `setup/setup.py` consumes generated metadata instead of
+maintaining a second dependency list. The same manifest supplies explicit hidden
+imports for code executed inside Cython extensions. Builds require CPython 3.12
+with `Python.h` and the pinned PyInstaller; `auditwheel` and `patchelf` remain
+optional wheel portability checks.
+See `tools/release/README.md` for commands and artifact layout.
 
 Console entry points (declared in `pyproject.toml`):
 - `xqsim` → `xqsim.xqsim_run:main`
@@ -81,18 +102,23 @@ Console entry points (declared in `pyproject.toml`):
 
 ## Running the simulator
 
-The user-facing flow is config-driven, not code-driven:
+The user-facing flow is config-driven, not code-driven. Researchers use the
+deployed executable; contributors may use the editable environment:
 
 ```bash
+/usr/local/xqsim/xqsim -c <config.yml | config.xml>
 uv run xqsim -c <config.yml | config.xml>
 ```
 
-`xqsim_run.main` calls `Simulator.init_with_config(path)` which:
+`xqsim_run.main` calls `Simulator.init_with_config_path(path)` which:
 1. Picks a parser by extension — `.yml` → `common_utils.load_yaml(..., macro=True)`,
    `.xml` → `simulator.load_xml` (the XML parser maps the legacy schema with
    `Universe / Constants / Modules / Portfolio` into the same dict shape as the YAML form).
-2. Substitutes `${...}` macros (the runtime always injects `${xqsim_modules}` pointing
-   at the installed `xqsim/modules/` dir, plus `${config}` = config-file dir).
+2. Substitutes `${...}` macros. `${config}` is the config-file directory;
+   `${xqsim_modules}` is the bundled built-in module directory. The default
+   external root is `/usr/local/xqsim` (override with `XQSIM_HOME` for tests),
+   exposed as `${xqsim_home}` plus `${xqsim_alpha}`, `${xqsim_operation}`,
+   `${xqsim_stats}`, `${xqsim_provider}`, and `${xqsim_config}`.
 3. Walks four config sections in order — `global` → `provider` → `module` → `alpha` —
    wiring providers, alpha modules, ops, and stats into an `AlphaManager`.
 
@@ -208,10 +234,17 @@ or write a one-off `examples/module_demo/`-style script instead.
   filename next to `static_provider.py`; override per-provider via `mysql_config`
   in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
   replace it locally before pointing at a real DB.
-- The Cython release pipeline means: if you add a new module under `xqsim/` that
-  needs to be importable as source (base class, public API, entry point), add it to
-  `copy_only_list` in `tools/release/build_cython.py`. Otherwise it will be shipped
-  as a compiled `.so`/`.pyd` only.
+- When adding a module under `xqsim/`, classify it explicitly in
+  `tools/release/release_manifest.py`. Researcher-facing contracts, base classes,
+  entry points, and file-path-loaded built-ins normally remain source; internal
+  runtime implementations normally compile to `.so`. Exclusions require a reason.
+  Never bypass the manifest coverage check.
+- Public research modules live outside the executable under
+  `/usr/local/xqsim/{alpha,operation,stats,provider,config}`. Alpha, Operation,
+  Stats, and Provider files export the same-named class or `create`. The loader
+  keys modules by absolute path, so equal filenames in different directories are
+  valid. Contributions must be reviewed and deployed rather than edited in place;
+  credentials never belong in the Provider directory.
 
 ## Living documentation
 

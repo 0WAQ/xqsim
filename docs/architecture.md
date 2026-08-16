@@ -391,3 +391,46 @@ Provider 产出写入临时目录（`output_cache_dir`），通过 `update_tools
 ```
 
 改 XML 就能切换因子、换 Operator 组合、调仓位规模，不需要写脚本。
+
+---
+
+## 10. 单文件发布与外部研究模块
+
+研究员使用 `/usr/local/xqsim/xqsim`，它是面向 Linux x86_64 的单文件 ELF，
+内含 CPython 3.12、运行依赖和 Cython 编译后的核心实现。平台 wheel 仍是发布
+流水线内部的可验证中间产物，不要求研究员安装 Python、uv 或虚拟环境。
+PyInstaller one-file 启动时会把原生库释放到临时目录，因此目标机器的临时
+文件系统必须允许加载和执行动态库。
+
+`tools/release/release_manifest.py` 同时控制两个显式边界：每个 `xqsim/`
+模块必须归入 source、compiled 或带理由的 excluded 分类；Cython 扩展中静态
+分析不可见的运行时 import 必须列入 frozen hidden imports。任何未分类核心模块
+或冻结后缺失依赖都会使构建或真实启动 smoke test 失败。
+
+框架版本不可变，根级符号链接负责原子升级和回滚；公共研究代码独立于框架版本：
+
+```text
+/usr/local/xqsim/
+├── xqsim -> releases/<version>/xqsim
+├── releases/<version>/{xqsim,manifest.json,SHA256SUMS}
+├── alpha/
+├── operation/
+├── stats/
+├── provider/
+└── config/
+```
+
+配置加载器默认注入 `${xqsim_home}` 以及 `${xqsim_alpha}`、
+`${xqsim_operation}`、`${xqsim_stats}`、`${xqsim_provider}`、
+`${xqsim_config}`；测试环境可用 `XQSIM_HOME` 覆盖根目录。原有
+`${xqsim_modules}` 继续指向可执行文件内置模块。
+
+外部文件分别导出 `Alpha`、`Operation`、`Stats`、`Provider`，也可以导出
+统一的 `create` 工厂。动态加载器根据规范化绝对路径生成内部模块名，而不是使用
+文件 basename，因此不同目录下的同名文件可以在同一进程共存；加载异常保留原始
+traceback，文件 SHA-256 记录在模块对象和 `--check-module` 输出中。
+
+公共目录由发布流程初始化但不覆盖。研究员通过受审核的模块仓库贡献代码，部署后的
+目录对普通用户只读；Provider 凭据、数据缓存、个人因子、输出和 checkpoint 均不
+进入 `/usr/local/xqsim` 的框架 release。完整构建、发布和回滚命令见
+[`tools/release/README.md`](../tools/release/README.md)。
