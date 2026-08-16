@@ -84,6 +84,12 @@ v1、v2 的有限值位置完全一致，相关系数均为 1.0，最大绝对�
 输入数据契约和验证结果；Provider 还要说明写入范围，且不得包含凭据。共享目录
 不是协作工作区：贡献应经过 Git 审核后部署，不能直接在线修改。
 
+当前公共清单包含通用/期货 Stats，以及 AlphaJrxDaily 已验证的行业中性、可用性
+过滤、逆波动加权、持有期平均、booksize 缩放和主力映射 Operation。配置例如使用
+`${xqsim_operation}/op_sector_neutralize.py`。新增公共实现时提交源码并修改
+`public_modules/deploy.json`，先运行 `python tools/release/deploy.py --check-only`，
+审核后再执行 `python tools/release/deploy.py`。
+
 每次研究记录应保存框架版本、配置、公共模块仓库 commit，以及运行时输出的模块
 SHA-256。同名文件可以存在于不同分类目录，加载器会按绝对路径隔离模块身份。
 

@@ -20,4 +20,5 @@ or `create` and are referenced by their own paths.
 
 Do not edit these shared directories directly. Contribute through the reviewed
 public-module repository, then deploy an approved snapshot. Provider code must
-never contain database credentials.
+never contain database credentials. `public-modules.json` records the deployed
+source commit and SHA-256 for every managed file.

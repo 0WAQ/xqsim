@@ -94,8 +94,8 @@ executable="${output}/executable/xqsim"
     "${executable}" --expected-version "${release_version}"
 
 if [[ -n "${PUBLISH_ROOT:-}" ]]; then
-    "${python_bin}" "${release_dir}/publish_release.py" \
-        "${output}" "${PUBLISH_ROOT}"
+    "${python_bin}" "${release_dir}/deploy.py" \
+        --artifact "${output}" --root "${PUBLISH_ROOT}"
 fi
 
 echo "Release ready: ${output}"

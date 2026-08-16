@@ -110,7 +110,9 @@ bash tools/release/release.sh
 ```
 
 `release.sh` refuses a dirty tree by default and never overwrites an existing
-version. Researchers then run:
+version. It routes publication through `deploy.py`, so the allowlisted public
+modules are validated against the new ELF and deployed in the same invocation.
+Researchers then run:
 
 ```bash
 /usr/local/xqsim/xqsim -c /path/to/factor.yml
@@ -118,6 +120,38 @@ version. Researchers then run:
 
 If an offline build is required, `DEPENDENCY_WHEELHOUSE` must contain every
 locked runtime dependency plus the pinned PyInstaller build dependencies.
+
+## Unified Deployment
+
+`public_modules/deploy.json` is the explicit allowlist for public files. Its
+sources are repository-relative; `target` is optional and defaults to the source
+basename. The deployer validates all Python modules with the selected runtime,
+uses atomic file replacement, records SHA-256 values in
+`/usr/local/xqsim/public-modules.json`, and never deletes unlisted files.
+
+Validate the manifest and imports without writing:
+
+```bash
+python tools/release/deploy.py --check-only
+```
+
+Deploy only the public modules against the active runtime:
+
+```bash
+python tools/release/deploy.py
+```
+
+Publish an already-built framework artifact and the public modules together:
+
+```bash
+python tools/release/deploy.py --artifact /tmp/xqsim-release-version
+```
+
+Use `--root`, `--manifest`, `--source-root`, or `--runtime` for an isolated
+deployment. Public module files are installed mode `0444`; approved updates are
+performed by running the deployer again from a reviewed commit. A write refuses
+uncommitted changes to the deployer, manifest, or managed sources; unrelated
+worktree changes are ignored. `--allow-dirty` is only for an isolated local test.
 
 ## Rollback
 

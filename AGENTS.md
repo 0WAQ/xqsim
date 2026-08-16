@@ -26,6 +26,9 @@ xqsim-py/
 │       ├── industries.csv # 品种 → industry_l1 × CTA 粗行业 静态表 (industry.py 数据源)
 │       ├── config_production.yml
 │       └── mssql.json
+├── public_modules/        # reviewed researcher-visible modules + deploy allowlist
+│   ├── deploy.json        # explicit source -> public runtime target mapping
+│   └── operation/         # canonical public Operation implementations
 ├── data/                  # 本地数据 (meta 索引等, 不 pip 安装)
 │   ├── stocks/cc/meta/    # 股票 cache index CSVs (DateIndex / InstrumentIndex / ...)
 │   └── futures/           # 期货 cc: meta/ 与数据目录 (Hot/KLine/...) 扁平同级
@@ -46,6 +49,7 @@ xqsim-py/
 │   │   └── csv_flow.py
 │   └── release/           # Cython release pipeline (kept separate from the packages)
 │       ├── release.sh
+│       ├── deploy.py              # unified framework + public-module deployer
 │       ├── build_cython.py        # stage + PEP 517 wheel build + artifact manifest
 │       ├── build_executable.py    # freeze installed binary wheel into one ELF
 │       ├── executable_main.py     # PyInstaller entry point
@@ -83,7 +87,9 @@ installs it in a clean venv, then freezes CPython, dependencies, and the compile
 core with PyInstaller. It starts the resulting ELF and loads same-named external
 Alpha/Operation/Stats/Provider files before publication. Published versions are
 immutable under `/usr/local/xqsim/releases/<version>/`; the root `xqsim` symlink
-is the atomic activation and rollback point.
+is the atomic activation and rollback point. `deploy.py` validates every entry in
+`public_modules/deploy.json` with the target ELF before atomically copying it;
+`release.sh` uses this same entry point when `PUBLISH_ROOT` is set.
 
 `tools/release/release_manifest.py` is the authoritative explicit boundary:
 every module under `xqsim/` must be listed as source, compiled, or excluded.
@@ -246,7 +252,10 @@ or write a one-off `examples/module_demo/`-style script instead.
   researcher workspaces and export `Alpha` or `create`. The loader keys modules
   by absolute path, so equal filenames in different directories are valid.
   Contributions must be reviewed and deployed rather than edited in place;
-  credentials never belong in the Provider directory.
+  credentials never belong in the Provider directory. Add shared files through
+  `public_modules/deploy.json`, validate with
+  `python tools/release/deploy.py --check-only`, and deploy with
+  `python tools/release/deploy.py`.
 
 ## Living documentation
 

@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "modules": [
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_availability_mask.py"
+    },
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_holding_average.py"
+    },
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_map_to_hot.py"
+    },
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_power_invvol.py"
+    },
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_scale_booksize.py"
+    },
+    {
+      "type": "operation",
+      "source": "public_modules/operation/op_sector_neutralize.py"
+    },
+    {
+      "type": "stats",
+      "source": "xqsim/modules/stats_general.py"
+    },
+    {
+      "type": "stats",
+      "source": "xqsim/modules/stats_futures.py"
+    }
+  ]
+}
