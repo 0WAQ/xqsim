@@ -117,8 +117,9 @@ uv run xqsim -c <config.yml | config.xml>
 2. Substitutes `${...}` macros. `${config}` is the config-file directory;
    `${xqsim_modules}` is the bundled built-in module directory. The default
    external root is `/usr/local/xqsim` (override with `XQSIM_HOME` for tests),
-   exposed as `${xqsim_home}` plus `${xqsim_alpha}`, `${xqsim_operation}`,
-   `${xqsim_stats}`, `${xqsim_provider}`, and `${xqsim_config}`.
+   exposed as `${xqsim_home}` plus `${xqsim_operation}`, `${xqsim_stats}`,
+   `${xqsim_provider}`, and `${xqsim_config}`. `${xqsim_alpha}` remains a
+   compatibility macro but its directory is not created or managed.
 3. Walks four config sections in order — `global` → `provider` → `module` → `alpha` —
    wiring providers, alpha modules, ops, and stats into an `AlphaManager`.
 
@@ -240,10 +241,11 @@ or write a one-off `examples/module_demo/`-style script instead.
   runtime implementations normally compile to `.so`. Exclusions require a reason.
   Never bypass the manifest coverage check.
 - Public research modules live outside the executable under
-  `/usr/local/xqsim/{alpha,operation,stats,provider,config}`. Alpha, Operation,
-  Stats, and Provider files export the same-named class or `create`. The loader
-  keys modules by absolute path, so equal filenames in different directories are
-  valid. Contributions must be reviewed and deployed rather than edited in place;
+  `/usr/local/xqsim/{operation,stats,provider,config}`. Operation, Stats, and
+  Provider files export the same-named class or `create`; factor files remain in
+  researcher workspaces and export `Alpha` or `create`. The loader keys modules
+  by absolute path, so equal filenames in different directories are valid.
+  Contributions must be reviewed and deployed rather than edited in place;
   credentials never belong in the Provider directory.
 
 ## Living documentation

@@ -74,15 +74,15 @@ v1、v2 的有限值位置完全一致，相关系数均为 1.0，最大绝对�
 
 ## 公共研究模块
 
-研究员个人因子和配置保留在自己的工作目录；可复用实现经过审核后发布到
-`/usr/local/xqsim/alpha`、`operation`、`stats`、`provider` 或 `config`。
-四类 Python 模块分别导出 `Alpha`、`Operation`、`Stats`、`Provider`，也可以
-导出 `create` 工厂。公共基类统一从 `xqsim.api` 导入。
+研究员因子保留在自己的工作目录，导出 `Alpha` 或 `create`；可复用的公共实现
+经过审核后发布到 `/usr/local/xqsim/operation`、`stats`、`provider` 或
+`config`。三类 Python 公共模块分别导出 `Operation`、`Stats`、`Provider`，
+也可以导出 `create` 工厂。公共基类统一从 `xqsim.api` 导入。
 
-配置优先使用 `${xqsim_alpha}`、`${xqsim_operation}`、`${xqsim_stats}`、
-`${xqsim_provider}` 和 `${xqsim_config}`，不要硬编码具体框架版本目录。提交公共
-模块时必须附最小配置、输入数据契约和验证结果；Provider 还要说明写入范围，且不得
-包含凭据。共享目录不是协作工作区：贡献应经过 Git 审核后部署，不能直接在线修改。
+配置优先使用 `${xqsim_operation}`、`${xqsim_stats}`、`${xqsim_provider}` 和
+`${xqsim_config}`，不要硬编码具体框架版本目录。提交公共模块时必须附最小配置、
+输入数据契约和验证结果；Provider 还要说明写入范围，且不得包含凭据。共享目录
+不是协作工作区：贡献应经过 Git 审核后部署，不能直接在线修改。
 
 每次研究记录应保存框架版本、配置、公共模块仓库 commit，以及运行时输出的模块
 SHA-256。同名文件可以存在于不同分类目录，加载器会按绝对路径隔离模块身份。

@@ -413,22 +413,23 @@ PyInstaller one-file 启动时会把原生库释放到临时目录，因此目�
 /usr/local/xqsim/
 ├── xqsim -> releases/<version>/xqsim
 ├── releases/<version>/{xqsim,manifest.json,SHA256SUMS}
-├── alpha/
 ├── operation/
 ├── stats/
 ├── provider/
 └── config/
 ```
 
-配置加载器默认注入 `${xqsim_home}` 以及 `${xqsim_alpha}`、
-`${xqsim_operation}`、`${xqsim_stats}`、`${xqsim_provider}`、
+配置加载器默认注入 `${xqsim_home}` 以及 `${xqsim_operation}`、
+`${xqsim_stats}`、`${xqsim_provider}`、
 `${xqsim_config}`；测试环境可用 `XQSIM_HOME` 覆盖根目录。原有
-`${xqsim_modules}` 继续指向可执行文件内置模块。
+`${xqsim_modules}` 继续指向可执行文件内置模块。`${xqsim_alpha}` 仅作为旧配置
+兼容宏保留，发布流程不创建或管理其目标目录；新因子应使用研究员自己的路径。
 
-外部文件分别导出 `Alpha`、`Operation`、`Stats`、`Provider`，也可以导出
-统一的 `create` 工厂。动态加载器根据规范化绝对路径生成内部模块名，而不是使用
-文件 basename，因此不同目录下的同名文件可以在同一进程共存；加载异常保留原始
-traceback，文件 SHA-256 记录在模块对象和 `--check-module` 输出中。
+研究员工作区内的因子文件导出 `Alpha` 或 `create`；公共目录内的外部文件分别
+导出 `Operation`、`Stats`、`Provider`，也可以导出统一的 `create` 工厂。动态
+加载器根据规范化绝对路径生成内部模块名，而不是使用文件 basename，因此不同
+目录下的同名文件可以在同一进程共存；加载异常保留原始 traceback，文件 SHA-256
+记录在模块对象和 `--check-module` 输出中。
 
 公共目录由发布流程初始化但不覆盖。研究员通过受审核的模块仓库贡献代码，部署后的
 目录对普通用户只读；Provider 凭据、数据缓存、个人因子、输出和 checkpoint 均不

@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 
 
-PUBLIC_DIRS = ("alpha", "operation", "stats", "provider", "config")
+PUBLIC_DIRS = ("operation", "stats", "provider", "config")
 PUBLIC_README = Path(__file__).with_name("PUBLIC_MODULES.md")
 
 

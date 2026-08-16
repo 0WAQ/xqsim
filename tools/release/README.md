@@ -24,7 +24,6 @@ temporary directory at startup; the target host must allow execution there.
 │       ├── xqsim
 │       ├── manifest.json
 │       └── SHA256SUMS
-├── alpha/
 ├── operation/
 ├── stats/
 ├── provider/
@@ -33,7 +32,7 @@ temporary directory at startup; the target host must allow execution there.
 ```
 
 `releases/<version>` is immutable. Publishing initializes but never replaces
-the five public directories. Framework rollback only repoints the root `xqsim`
+the four public directories. Framework rollback only repoints the root `xqsim`
 symlink.
 
 ## External Module Contract
@@ -41,7 +40,7 @@ symlink.
 A module is one ordinary Python file and exports its conventional class or a
 `create` factory:
 
-- `alpha/`: `Alpha` or `create`;
+- a factor file in the researcher's workspace: `Alpha` or `create`;
 - `operation/`: `Operation` or `create`;
 - `stats/`: `Stats` or `create`;
 - `provider/`: `Provider` or `create`.
@@ -61,7 +60,6 @@ Configurations always receive these macros:
 
 ```text
 ${xqsim_home}       /usr/local/xqsim
-${xqsim_alpha}      /usr/local/xqsim/alpha
 ${xqsim_operation}  /usr/local/xqsim/operation
 ${xqsim_stats}      /usr/local/xqsim/stats
 ${xqsim_provider}   /usr/local/xqsim/provider
@@ -70,7 +68,9 @@ ${xqsim_config}     /usr/local/xqsim/config
 
 Set `XQSIM_HOME` only for isolated testing or a non-standard installation.
 `${xqsim_modules}` remains available for built-in modules bundled with the
-runtime.
+runtime. `${xqsim_alpha}` remains a compatibility macro, but the publisher does
+not create or manage its target directory; new factor configs use researcher
+workspace paths.
 
 ## Build
 
