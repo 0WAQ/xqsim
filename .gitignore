@@ -71,6 +71,7 @@ providers/cc_update/Data/
 /cc/Data/
 /cc_update/Data/
 cc_temp/
+pnl_temp/
 cc_prod/
 checkpoint/
 **/save.bin

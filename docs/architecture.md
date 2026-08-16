@@ -2,16 +2,21 @@
 
 ## 1. 一个因子是怎么跑的
 
-回测区间 242 个交易日，标的池 6000 只股票。框架逐日循环：
+框架按交易日连续调用，`di > 0`。有状态因子可以先请求 warmup，再进入正式
+回测区间：
 
 ```python
+# 可选：只推进原始因子的历史状态，不执行 Operation、保存或 Stats
+for di in range(begin_di - warmup_days, begin_di):
+    alpha.generate(di)
+
 for di in [begin_di .. end_di]:
     # Step 1: 因子计算，产出 v1
     alpha.generate(di)
 
     # Step 2: Operator 链式变换，v1 → v2
     for op in operators:
-        op.generate(di, alpha)
+        op.apply(di, alpha)
 
     # Step 3: v2 → 持仓缩放 → 交易模拟 → 累积 PnL
     stats.calculate_di(di, alpha)
@@ -28,10 +33,16 @@ stats.save_pnl()
 class MyAlpha(AlphaBase):
     def generate(self, di):
         # self.alpha 是长度 6000 的向量，每个位置 = 一只股票的因子值
-        self.alpha[:] = self.close[di] / self.close[di - 20] - 1  # 20日动量
+        # 目标日 di 的仓位只使用 di 之前的数据
+        self.alpha[:] = self.close[di - 1] / self.close[di - 21] - 1
 ```
 
-每天调一次，输出一个截面向量——这就是 **v1**。
+`generate(di)` 的输出语义是目标日 `di` 的仓位或信号，动态数据一般只能来自
+`[history_begin, di)`。函数返回后、Operation 执行前的 `self.alpha` 是
+**v1（原始因子值）**。滚动历史由 Simulator 按 `warmup_days` 显式逐日推进，
+不应在一次 `generate` 内隐藏回放循环。
+AlphaManager 在每次正式调用和 warmup 调用前重置 `self.alpha`，因子只负责写入
+当天 v1，不需要在 `generate` 内再次 reset。
 
 ---
 
@@ -53,12 +64,14 @@ v2 (处理后的因子值)
 
 ```python
 class DecayOp(OperationBase):
-    def generate(self, di, alpha):
+    def apply(self, di, alpha):
         alpha[:] = self.decay * self.last_alpha + (1 - self.decay) * alpha
         self.last_alpha = alpha.copy()
 ```
 
-Operator 有状态（比如衰减要记住昨天的值），所以必须在逐日循环内执行——这就是为什么 **v1→v2 属于回测框架的一部分**。
+Operation 对目标日 `di` 的当前 alpha 原地变换；它使用哪一天或哪段辅助数据由
+自身语义决定。整条链执行结束后的 `self.alpha` 是 **v2（处理后因子值）**。
+Operation 可以有状态（比如衰减要记住昨天的值），所以必须在逐日循环内执行。
 
 ---
 
@@ -100,7 +113,7 @@ def calculate_di(self, di, alpha):
 for di in [begin_di .. end_di]:
     alpha.generate(di)
     for op in operators:
-        op.generate(di, alpha)
+        op.apply(di, alpha)
     stats.calculate_di(di, alpha)
 
 # 分钟频
@@ -108,7 +121,7 @@ for di in [begin_di .. end_di]:
     for ti in [begin_ti .. end_ti]:
         alpha.generate(di, ti)
         for op in operators:
-            op.generate(di, ti, alpha)
+            op.apply(di, alpha)
         stats.calculate_di(di, ti, alpha)
 ```
 
@@ -192,6 +205,82 @@ class MyAlpha(AlphaBase):
         self.ret = self.dr.get_data("k.ret")          # 日收益率
         self.uv = self.dr.get_data("uv.hs300")        # 沪深300成分 (bool)
 ```
+
+单个名称返回 `DataViewImpl`（抽象类型为 `DataView`），而不是直接返回
+`ndarray`。它包装当前加载的数据块，并把全局 `di` 转换成块内下标：
+
+```python
+close = self.dr.get_data("k.close")
+row = close[di]                 # ndarray, shape (ii_size,)
+window = close[di - 20:di]      # stop 不包含 di
+raw = close.data                # 当前内存块的底层 ndarray
+first_di = close.offset_di      # raw[0] 对应的全局 di
+```
+
+因子应优先通过 `view[di]` 或 `view[begin:di]` 读取；不要把全局 `di` 直接用于
+`view.data[di]`，因为 `.data` 使用局部下标。分段加载时，DataView 还能在访问
+窗口越界时请求 DataRepository 重载对应数据块。
+
+传入多个名称或通配符匹配到多个名称时，`get_data()` 返回
+`dict[str, DataViewImpl]`；最终只解析出一个名称时仍直接返回单个 DataView。
+
+#### 返回形态
+
+| 调用 | 返回值 |
+|---|---|
+| `get_data("k.close")` | 单个 `DataViewImpl` |
+| `get_data("k.close", "k.volume")` | `dict[str, DataViewImpl]` |
+| `get_data("k.*")` 匹配多个名称 | `dict[str, DataViewImpl]` |
+| 多名称/通配符最终只解析出一个名称 | 单个 `DataViewImpl`，不是字典 |
+
+不存在的明确名称会让框架 abort；通配符一个都未匹配时返回空字典。
+
+#### 索引与 offset
+
+DataView 接收全局 `di`，内部按下面的关系访问当前内存块：
+
+```text
+local_di = global_di - view.offset_di
+```
+
+例如当前数据块 `offset_di == 6126`：
+
+```python
+close = dr.get_data("k.close")
+row = close[6613]                 # 实际读取 close.data[487]
+value = close[6613, ii]           # tuple 索引继续作用于 ii 轴
+rank = dr.get_data("rk.long_pos")
+rank_row = rank[6613]             # shape (ri_size, ii_size)
+rank_value = rank[6613, ri, ii]
+```
+
+切片右端不包含 stop，并且 start、stop 都必须显式提供；`view[:di]` 和
+`view[begin:]` 不受支持。分段加载时，请求窗口必须能被当前 segment/back_days
+覆盖，因此配置的 `back_days` 至少要达到因子的最大历史窗口。
+
+#### 常用属性
+
+| 属性/方法 | 含义 |
+|---|---|
+| `.data` | 当前内存块的底层 `ndarray`，使用局部下标 |
+| `.offset_di` | `.data[0]` 对应的全局交易日下标 |
+| `.offset` | 内部索引 offset；日频通常与 `offset_di` 相同 |
+| `.shape` | 当前内存块形状，不是全历史逻辑形状 |
+| `.dtype` | 底层数组 dtype |
+| `.name` | 数据名称，如 `k.close` |
+| `.size` | 当前实现返回底层数组第 0 轴长度 |
+| `.enable_write()` | 将底层数组设为可写；普通因子读取不应调用 |
+
+`.shape` 和 `.data.shape` 适合读取维度信息，例如 cube 的 `ri_size`；但
+`.data` 绕过了全局日期转换和越界检查。若确实需要局部数组，下标应写成
+`di - view.offset_di`，并明确处理后续 reload。
+
+#### 分段重载与对象生命周期
+
+当目标 `di` 不在当前内存块时，DataView 会调用 `DataRepository.reload()`；
+DataRepository 在原数组上装入新 segment，并更新共享的 `offset_di`。
+底层内存可能因此被覆盖。若要跨多个交易日长期保存 `view[di]` 的结果，应使用
+`view[di].copy()`，不要长期持有可能随 reload 改变的底层数组视图。
 
 所有数据统一存储为 `(di × ii)` 或 `(di × ti × ii)` 的 numpy 矩阵，落盘为带 header 的二进制文件。命名约定：
 

@@ -16,6 +16,12 @@ class AlphaBase(ModuleBase):
         self.output_dir = os.path.join(self.output_cache_dir, FACTOR_DIR, self.dir_name)
 
         self.delay: int = simcfg.get(self.cfg, "delay", 1)  # type: ignore
+        # Optional state warmup driven by Simulator before the configured begin_di.
+        # A factor's generate(di) still processes exactly one target day; historical
+        # replay must not be hidden inside the factor implementation.
+        self.warmup_days: int = int(simcfg.get(self.cfg, "warmup_days", 0))  # type: ignore
+        if self.warmup_days < 0:
+            raise ValueError("warmup_days must be non-negative")
         valid_name = simcfg.get(self.cfg, "universeId", None)
         if valid_name is not None:
             self.valid = self.dr.get_data(valid_name)

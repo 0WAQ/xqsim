@@ -155,17 +155,17 @@ class Stats(StatsBase):
         corr = utils.calc_cor(alpha, self.ret[di])
         # print(corr)
         alpha = self.calculate_alpha(di, alpha)
-        value = utils.scale_book_size(alpha, self.book_size, self.scale)
+        value = utils.scale_to_booksize(alpha, self.booksize, self.scale)
         if self.limit_flag:
             value = self.calculate_trade_limit(di, value, self.last_value, self.value_pct)
-        self.calculate_general(self.stats, di, value, self.last_value, self.book_size)
+        self.calculate_general(self.stats, di, value, self.last_value, self.booksize)
         result = [self.meta.total_date_index[di],
                   self.meta.interval_time_index[0],
                   self.stats.pnl,
                   self.stats.long_value,
                   self.stats.short_value,
                   self.stats.ret,
-                  self.book_size,
+                  self.booksize,
                   self.stats.trade_value,
                   self.stats.hold_value,
                   self.stats.long_num,

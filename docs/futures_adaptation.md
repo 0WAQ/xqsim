@@ -84,8 +84,13 @@
 
 - `multiplier`（合约乘数，每品种固定）：新静态票维数据 provider，
   数据可取自 ldcta 的合约信息表（`provider/futures_instrument_info.py` 对应来源）。
-- 期货版 stats 模块：先定收益口径（按保证金 or 名义本金），再逐个核对
-  sharpe / bpmargin / tvr 等公式。
+- ~~期货版 stats 模块~~ 已实现 `xqsim/modules/stats_futures.py`（2026-08-10）。
+  口径取 LDCTA `stats_cta_cfi.cpp` 的名义本金法：alpha 归一到 book_size 名义
+  头寸，`pnl = Σ last_value × k.returns`（收益直接用槽位自身的 `k.returns`，
+  天然无换月污染，不需要乘数/手数），新建仓当日不计 pnl（隐含昨收成交），
+  不含手续费/保证金。`ret = pnl × 2 / book_size`，产出 raw/daily/year 三个
+  csv（复用 `utils.get_daily_df` / `pnl_scale` 的 sharpe/fitness/mdd 等指标）。
+  已在 demo 因子回测上验证（手算抽查 3 天与 csv 一致）。
 - 期货版 op：仓位 sizing 按手数；按 hot 映射筛主力/移仓；分组中性化用品种
   （pi）分组而非股票行业。
 
@@ -138,7 +143,7 @@
 | meta 数据 | DateIndex / InstrumentIndex（合约 listed/expired）/ time_index 换期货 | 否 |
 | provider | 期货 universe、kline、hot 映射、multiplier、pi 静态数据 | 否（新模块） |
 | op | 品种分组中性化、hot 筛主力/移仓、按手数 sizing | 否（新模块） |
-| stats | 期货盈亏口径（乘数、保证金/名义本金） | 否（新模块） |
+| stats | 期货盈亏口径（名义本金 × k.returns，已有初版 stats_futures） | 否（新模块） |
 | 引擎 | Simulator / AlphaTask / DataView / DataManager / checkpoint | **零改动** |
 
 引擎内仅有的两个股票假设，均可用配置绕开：
@@ -182,6 +187,7 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 | `universe.py` | `provider/futures_universe.py` | `uv.all`（活跃合约）+ `static.pi`；不连库 |
 | `hot.py` | `provider/futures_hot.py` | `hot.ii` / `hot.ii_next`（修掉 ldcta 顺序 bug） |
 | `instrument_info.py` | `provider/futures_instrument_info.py` | `static.multiply` / `static.ticksize` |
+| `industry.py` | 新建（ldcta 无对应） | `ind.l1` / `ind.sector` 品种行业分类（int 平铺同 static.pi，未收录 -1）；不连库，读 `industries.csv`（51 品种 × industry_l1 × CTA 粗行业）；enum 落 `Enum_industry_l1.csv` / `Enum_sector.csv`；静态表，目录存在即跳过，表变更需删 `Industry/` 重建 |
 | `positions_rank.py` | 新建（ldcta 无对应） | `rk.*` 会员排名 cube（见下） |
 | `config_production.yml` | 新建 | `index_category: FUTURES`、`adj_window: -1` |
 
@@ -194,6 +200,9 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
   数量、较上日增减、该名次会员 enum id；三张榜同名次会员不同，member 按榜分开）
 - 数值 float64 缺名次 NaN、member int64 缺名次 -1；不前填；48 号主力槽
   拷整条 rank 切片
+- **聚合注意**：48 槽的 rank 切片是主力槽的完整拷贝（49 为保留合成槽），
+  跨合约聚合同品种持仓时必须剔除 `ii%50 in {48,49}` 的槽，否则主力合约
+  被重复计一遍（2026-08-15 金标对拍实证）
 - 会员身份：compcode 优先、缺失回退 `NAME::会员名`
   （`futures_common.member_key`);enum 落 `meta/enum/Enum_member.csv`,
   **id 只增不改**（`futures_common.load_or_extend_member_enum`,meta_updater
@@ -201,6 +210,19 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 - 消费：`dr.get_data("rk.long_pos")` → (di, 20, ii) 视图；`meta.enum_index_dict["member"][id]` 反查会员
 - 注意：曾有一版 top20 聚合 provider(`pos.*`）已废弃删除，合计由 cube
   沿 ri 轴求和 derive，单一事实来源
+- 消费样例：`examples/alpha_demo/AlphaTest/`——
+  AlphaJrx_MemberSkillSectorPower2InvVol60_v001 的 xqsim 适配版（2026-08-14 跑通）。
+  **信号/仓位分层**：因子 `AlphaMemberSkill.py` 只出原始信号（按 static.pi 把 cube
+  聚合成品种×会员 direction/gross_share，行业内 504 日滚动 t 值能力 + signed 投票，
+  ffill(3)+shift(1)，写前一交易日 hot 槽）；仓位链拆成 op（`ops/` 下
+  sector_neutralize / availability_mask / power_invvol / holding_average，
+  配置里按序串接），行业分组读框架静态数据 ind.l1/ind.sector；原包的
+  ScaleToBooksize 不移植（stats scale=0 已覆盖）。文件头注释有完整对应关系。
+  **金标对拍**(goldcheck/)：从 cube 导出原包输入（member csv + ret.csv）跑原包，
+  仓位逐品种对比 51/51 全过（corr ≥ 0.998，单体版曾达 0.99996+；差异源于拆分后
+  无主力槽品种在归一化前即剔除，截面构成略有不同，口径更合理）;
+  原包把 alpha 截到 start_date 后再算 InvVol60，窗口起点有 60 日
+  空仓盲区，适配版保留了 backdays 热身（更合理，非错误）
 
 运行（需 MSSQL 网络，`mssql.json` 已配）：`meta_updater.py` →
 `uv run xqsim -c providers/futures/config_production.yml` →
@@ -243,12 +265,12 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 - 死品种 hot 槽语义差异（上表），若下游策略依赖陈旧主力需知悉
 - **`stats_general` 是股票口径，期货不可用**：其 `__init__` 无条件加载
   `k.vwap/k.value/k.ret/k.upper/k.lower`（期货只有 `k.returns`，无 vwap/value/
-  涨跌停字段），配置引用即 abort（2026-08-09 跑 AlphaWbaiHotMomentum 实证，
-  demo 配置已注释掉 Stats）。期货版 stats（名义本金口径：Δ价×乘数×手数）
-  见第 6 节分期，是一期最后的大块
+  涨跌停字段），配置引用即 abort。期货版 `stats_futures` 已实现并接入 demo
+  （见 §2.3）；注意 `save_pnl` 依赖的 `utils.pnl_scale` 与 pandas 2.x 不兼容，
+  需在调用方先转 Date 列（见 known_issues）
 - ~~pi 维基本面（库存/仓单/现货）二期再搬~~ 已在一期完成（di×80 直写，
   见 §4.1 表格与比对结论）；`futures_apispot` 弃
-- 夜盘/分钟级、期货版 op/stats：见第 6 节分期
+- 夜盘/分钟级、期货版 op：见第 6 节分期（stats 已有初版，见 §2.3）
 
 ## 5. 股票 + 期货双资产适配评估
 
@@ -263,8 +285,9 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 
 ## 6. 分期建议
 
-- **一期**：day 级 + 真实合约 ii + hot 映射筛主力 + 名义本金口径 stats。
+- **一期**：day 级 + 真实合约 ii + hot 映射筛主力 + 名义本金口径 stats（已落地
+  `stats_futures`，见 §2.3）。
   工作量集中在 provider 移植（MSSQL 读取、换月规则、multiplier、pi）和
-  期货版 stats/op 模块。
+  期货版 op 模块。
 - **二期**：分钟/tick 级（夜盘时段与归属）、保证金口径收益。
 - **三期（可选）**：股期混合截面，视策略需要再评估。

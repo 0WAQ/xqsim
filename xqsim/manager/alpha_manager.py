@@ -128,12 +128,29 @@ class AlphaTask(object):
             return
         value = None
         for stats in self.stats_list:
-            value = stats.calculate_di(di, 0, alpha=self.__alpha.alpha)
+            value = stats.calculate_di(di, alpha=self.__alpha.alpha)
         return value
 
     def run_before(self, di: int):
         self.__alpha.reset_alpha()
         self.__alpha.before_generate(di)
+
+    @property
+    def warmup_days(self) -> int:
+        return self.__alpha.warmup_days
+
+    def needs_warmup(self, di: int) -> bool:
+        return self.warmup_days > 0 and di >= self.__meta.begin_di - self.warmup_days
+
+    def run_warmup(self, di: int):
+        """Advance raw-alpha state for one historical day without ops or output."""
+        if not self.needs_warmup(di):
+            return
+        univbase.instruments = self.__meta.instrument_index[di]
+        self.__alpha.reset_alpha()
+        self.__alpha.before_generate(di)
+        self.__alpha.generate(di)
+        self.__alpha.after_generate(di)
 
     def run(self, di: int):
         univbase.instruments = self.__meta.instrument_index[di]
@@ -272,6 +289,15 @@ class AlphaManager(object):
     def run_before_di(self, di: int):
         for alpha_task in self.__all_task:
             alpha_task.run_before(di)
+
+    def warmup_days(self) -> int:
+        return max((task.warmup_days for task in self.__all_task), default=0)
+
+    def run_warmup_di(self, di: int):
+        # Portfolio warmup requires a separate dependency contract. Current
+        # stateful warmup is intentionally limited to ordinary alpha tasks.
+        for alpha_task in self.__alpha_task_list:
+            alpha_task.run_warmup(di)
 
     def run(self, di: int):
         print_flag = False

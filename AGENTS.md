@@ -22,6 +22,8 @@ xqsim-py/
 │       ├── *.py           # kline / universe / hot / instrument_info / meta_updater /
 │       │                  # mssql_provider(基类) / futures_common(代码换算) / hot_builder(主力判定)
 │       │                  # warehouse / instock / wind_commodity(pi 维) / positions_rank(会员持仓 cube)
+│       │                  # industry(品种行业分类 ind.l1/ind.sector, 不连库, 读 industries.csv)
+│       ├── industries.csv # 品种 → industry_l1 × CTA 粗行业 静态表 (industry.py 数据源)
 │       ├── config_production.yml
 │       └── mssql.json
 ├── data/                  # 本地数据 (meta 索引等, 不 pip 安装)
@@ -210,3 +212,23 @@ or write a one-off `examples/module_demo/`-style script instead.
   needs to be importable as source (base class, public API, entry point), add it to
   `copy_only_list` in `tools/release/build_cython.py`. Otherwise it will be shipped
   as a compiled `.so`/`.pyd` only.
+
+## Living documentation
+
+Documentation is part of the implementation and is written for researchers using
+the framework, including a future reader with no context from the current task.
+
+- `docs/architecture.md` — verified framework behavior, lifecycle, data layout, and
+  interfaces. Update it whenever framework behavior changes.
+- `docs/factor_research.md` — practical factor research, implementation, timing,
+  adaptation, and validation guidance. Record reusable conclusions, not a coding log.
+- `docs/idea_keywords.md` — low-friction inbox for ideas or keywords that are not yet
+  mature enough for the other documents. Include enough context to recover the idea.
+
+Before changing framework or factor behavior, read the relevant living document.
+Update code and documentation together when an interface, timing contract, data
+dependency, workflow, or validated conclusion changes. Put verified facts in the
+architecture or factor guide, and label hypotheses and unfinished experiments clearly.
+When an inbox idea matures, move its conclusion to the appropriate guide and mark the
+inbox entry resolved instead of silently deleting it. If code and docs disagree,
+verify runtime behavior and correct the documentation immediately.

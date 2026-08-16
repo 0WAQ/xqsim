@@ -224,6 +224,20 @@ class Simulator(object):
         log_info("Simulator start")
         # print(self.__base_config)
 
+        warmup_days = self.__alpha_manager.warmup_days()
+        if self.__meta.check_load_di is None and warmup_days > 0:
+            abort_if(warmup_days > self.__meta.back_days,
+                     "Alpha warmup days(%s) should <= back days(%s)",
+                     warmup_days, self.__meta.back_days)
+            warmup_begin_di = self.__meta.begin_di - warmup_days
+            log_info("Alpha warmup start, begin di %s, end di %s, days %s",
+                     warmup_begin_di, self.__meta.begin_di - 1, warmup_days)
+            for di in range(warmup_begin_di, self.__meta.begin_di):
+                self.__meta.current_di = di
+                self.__dr.prepare(di)
+                self.__alpha_manager.run_warmup_di(di)
+            log_info("Alpha warmup finish")
+
         for di in range(self.__meta.begin_di, self.__meta.end_di + 1):
             self.__meta.current_di = di
             self.__dr.prepare(di)

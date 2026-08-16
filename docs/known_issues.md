@@ -86,6 +86,17 @@ self.__alpha.save_csv_dir)` 因键已存在返回 `None`，直接 return。
 修法方向：`init_base` 只在配置显式给出时才 `set_para`（或默认 `""` 并在
 save_csv 侧把 None 当未配置处理）。
 
+## utils.pnl_scale 与新版 pandas 不兼容（LossySetitemError）— xqsim/utils.py
+
+`pnl_scale` 里 `df.loc[:, 'Date'] = [pd.Timestamp(str(x)) for ...]` 把 Timestamp
+列表赋给 int64 的 Date 列。旧版 pandas 静默换列 dtype，pandas 2.x 抛
+`LossySetitemError`（2026-08-10 跑 stats_futures 实证）。`stats_general` 走同
+一函数，同样会炸。
+
+绕过（stats_futures.save_pnl 已采用）：调用方先
+`df["Date"] = pd.to_datetime(df["Date"], format="%Y%m%d")` 再传入。
+修法方向：在 `pnl_scale` 内部做 `pd.to_datetime` 转换，不依赖调用方。
+
 ## 备注
 
 - line 127 `alpha_dict_list.append(portfolio_dict)` 把 portfolio 容器塞进了自己的子列表

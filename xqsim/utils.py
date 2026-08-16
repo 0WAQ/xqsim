@@ -26,7 +26,7 @@ def normalize(alpha, pct=0.003, mode=0):
     return alpha
 
 
-def scale_book_size(alpha, book_size, mode):
+def scale_to_booksize(alpha: np.ndarray, book_size: float, mode: int) -> np.ndarray:
     if mode == 0:
         value = np.nan_to_num(alpha)
         lv = np.sum(value[value > 0])
@@ -50,6 +50,8 @@ def scale_book_size(alpha, book_size, mode):
     elif mode == -1:
         value = np.nan_to_num(alpha)
         return value
+    else:
+        raise ValueError(f"mode must in (-1, 0, 1)")
 
 
 def calc_cor(array: np.ndarray, ret: np.ndarray):
