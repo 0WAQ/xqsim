@@ -145,6 +145,9 @@ defaults to `/usr/local/xqsim/data/futures/cc` and needs MSSQL access plus
 + `adj_window: -1`, already in that config). Consistency against the legacy ldcta cache
 is verified with `tools/futures/compare_ldcta.py`; semantics and validation results are
 documented in `docs/futures_adaptation.md` §4.1.
+The shared runtime currently provisions futures only: `data/futures/cc` is the live
+cache and `data/futures/cc_2024` is the fixed cutoff snapshot. Rebuild that snapshot
+with `tools/futures/snapshot_cache.py`; do not copy and rename the live cache.
 
 ## Architectural anchors
 
@@ -224,6 +227,8 @@ uv run python tools/ut/ut_run.py
 the `html_runner.add_module(...)` calls or use
 `HTMLRunner.run_test("ut_cls.kline", dr)`. Output goes to `/tmp/ut/result.html` and a
 summary `result.log`. The Prefect flow consumes that `result.log`.
+The current shared runtime does not provision this stock cache; create and refresh it
+before running the stock HTML suites.
 
 `scripts/smoke_test/` was removed in the 2026-05 cleanup; use `tools/ut/ut_run.py`
 or write a one-off `examples/module_demo/`-style script instead.

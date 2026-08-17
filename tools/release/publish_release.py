@@ -14,7 +14,10 @@ from pathlib import Path
 
 
 PUBLIC_DIRS = ("operation", "stats", "provider", "config")
-DATA_DIRS = (Path("data", "stocks", "cc"), Path("data", "futures", "cc"))
+DATA_DIRS = (
+    Path("data", "futures", "cc"),
+    Path("data", "futures", "cc_2024"),
+)
 PUBLIC_README = Path(__file__).with_name("PUBLIC_MODULES.md")
 
 

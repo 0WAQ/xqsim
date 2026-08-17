@@ -23,8 +23,8 @@
 引擎入口已通（`uv sync` + `uv run xqsim --version`），跑起来还需：
 
 1. **meta 索引**：`meta_dir` 下要有 `meta/index/{DateIndex,InstrumentIndex,StaticIndexSize}.csv`。
-   仓库 `data/stocks/cc/meta/` 保留 Git 跟踪的股票引导副本，运行时复制到
-   `/usr/local/xqsim/data/stocks/cc/meta/`；期货侧由
+   仓库 `data/stocks/cc/meta/` 保留 Git 跟踪的股票引导副本，但当前共享运行目录不
+   部署股票数据；期货侧由
    `providers/futures/meta_updater.py` 生成到 `/usr/local/xqsim/data/futures/cc/meta/`。
 2. **sample 配置路径**：`examples/sample_config.yml` 假设工作目录有 `./module` 和 `./cc`，
    是旧布局遗留；要么搭 staging 目录做软链，要么改配置里的 `provider_dir` 宏。
@@ -36,6 +36,9 @@
 
 默认运行时数据根为 `/usr/local/xqsim/data`。YAML 使用 `${xqsim_data}`；直接运行
 provider 或诊断脚本时可用 `XQSIM_DATA_HOME` 临时覆盖。
+固定历史研究使用 `/usr/local/xqsim/data/futures/cc_2024`；该快照由
+`tools/futures/snapshot_cache.py --cutoff 20241231` 从完整缓存生成，所有矩阵和逐日
+压缩数据均截止 2024-12-31。
 
 ## 2. 股票特异性分布与期货改动点
 

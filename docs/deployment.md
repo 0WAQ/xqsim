@@ -116,16 +116,18 @@ bash tools/release/release.sh
 
 ```text
 /usr/local/xqsim/data/
-├── stocks/cc/          # 股票生产缓存
-├── stocks/cc_update/   # 股票 Provider 临时产出，校验后合并
-└── futures/cc/         # 期货扁平缓存，数据目录与 meta/ 同级
+└── futures/
+    ├── cc/             # 持续更新的完整期货缓存
+    └── cc_2024/        # 固定截止 2024-12-31 的研究快照
 ```
 
 首次迁移保留源数据，并用全量 checksum 验证：
 
 ```bash
-rsync -a data/ /usr/local/xqsim/data/
-rsync -a --checksum --dry-run --itemize-changes data/ /usr/local/xqsim/data/
+mkdir -p /usr/local/xqsim/data/futures/cc
+rsync -a data/futures/cc/ /usr/local/xqsim/data/futures/cc/
+rsync -a --checksum --dry-run --itemize-changes \
+  data/futures/cc/ /usr/local/xqsim/data/futures/cc/
 ```
 
 第二条命令无输出即内容一致。生成期货数据时先更新 meta，再运行 build 配置：
@@ -135,14 +137,26 @@ uv run python providers/futures/meta_updater.py
 uv run xqsim -c providers/futures/config_production.yml
 ```
 
-股票使用 `providers/stocks/config_production.yml` 生成 `stocks/cc_update`，校验后再
-合入 `stocks/cc`。配置统一使用 `${xqsim_data}`；独立 Python 工具默认读取
-`/usr/local/xqsim/data`，测试其他根目录时设置 `XQSIM_DATA_HOME`。
+从完整缓存生成固定历史快照：
+
+```bash
+uv run python tools/futures/snapshot_cache.py \
+  /usr/local/xqsim/data/futures/cc \
+  /usr/local/xqsim/data/futures/cc_2024 \
+  --cutoff 20241231
+```
+
+脚本按 `DateIndex.csv` 将截止日收敛到最近交易日；连续矩阵会截断 payload 并重写
+header，逐日压缩文件只复制截止日以内的数据。目标目录必须不存在，脚本通过临时
+目录完整校验后才原子改名。
+
+配置统一使用 `${xqsim_data}`；独立 Python 工具默认读取 `/usr/local/xqsim/data`，
+测试其他根目录时设置 `XQSIM_DATA_HOME`。
 期货缓存使用 `update_tools` 时同时传
 `--meta /usr/local/xqsim/data/futures/cc --index-category FUTURES`。
 
-仓库携带的股票 bootstrap 日历目前止于 2022-12-30，只用于初始化目录；在当前日期
-运行股票校验或回测前，必须先用 `providers/stocks/meta_updater.py` 刷新生产 meta。
+当前共享目录不部署股票数据。框架仍保留股票支持；未来需要时应另行创建
+`data/stocks/cc`，并先用 `providers/stocks/meta_updater.py` 刷新生产 meta。
 
 发布框架只创建并保留数据目录，不复制、删除或回滚数据。Provider 源码不得包含
 数据库凭据；checkpoint、个人因子和运行输出仍不属于共享安装目录。

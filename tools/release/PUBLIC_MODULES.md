@@ -15,7 +15,8 @@ Public research modules live in the adjacent directories:
 
 Configurations may use the built-in macros `${xqsim_operation}`,
 `${xqsim_stats}`, `${xqsim_provider}`, `${xqsim_config}`, and `${xqsim_data}`.
-Shared caches live under `data/stocks/cc` and `data/futures/cc`. Factor code and
+Shared futures caches live under `data/futures/cc`; the fixed 2024 snapshot is
+`data/futures/cc_2024`. Stock data is not provisioned in this runtime. Factor code and
 outputs remain in the researcher's own workspace; factor files export `Alpha`
 or `create` and are referenced by their own paths.
 
