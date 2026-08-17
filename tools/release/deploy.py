@@ -25,8 +25,11 @@ from publish_release import (
 RELEASE_DIR = Path(__file__).resolve().parent
 REPO_ROOT = RELEASE_DIR.parent.parent
 DEFAULT_MANIFEST = REPO_ROOT / "public_modules" / "deploy.json"
-PUBLIC_TYPES = {"operation", "stats", "provider", "config"}
-MODULE_TYPES = PUBLIC_TYPES - {"config"}
+PUBLIC_TYPES = {
+    "operation", "stats", "provider", "portfolio", "config", "utility"
+}
+MODULE_TYPES = {"operation", "stats", "provider", "portfolio"}
+PYTHON_TYPES = MODULE_TYPES | {"utility"}
 DEPLOYMENT_RECORD = "public-modules.json"
 SAFE_NAME = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
@@ -40,6 +43,8 @@ class ModuleEntry:
 
     @property
     def relative_target(self) -> Path:
+        if self.module_type == "utility":
+            return Path(self.target_name)
         return Path(self.module_type, self.target_name)
 
 
@@ -94,7 +99,7 @@ def load_manifest(manifest_path: Path, source_root: Path) -> list[ModuleEntry]:
         source = (source_root / source_relative).resolve()
         if not source.is_relative_to(source_root) or not source.is_file():
             raise FileNotFoundError(source)
-        if module_type in MODULE_TYPES and source.suffix != ".py":
+        if module_type in PYTHON_TYPES and source.suffix != ".py":
             raise ValueError(f"{module_type} source must be a .py file: {source}")
 
         target_name = str(raw.get("target", source.name))

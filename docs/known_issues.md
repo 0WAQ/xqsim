@@ -97,15 +97,15 @@ save_csv 侧把 None 当未配置处理）。
 `df["Date"] = pd.to_datetime(df["Date"], format="%Y%m%d")` 再传入。
 修法方向：在 `pnl_scale` 内部做 `pd.to_datetime` 转换，不依赖调用方。
 
-## 共享 ELF 未包含 pymssql，无法加载期货 Provider
+## ~~共享 ELF 未包含 pymssql，无法加载期货 Provider~~（已修复，待发布）
 
 2026-08-17 用 `/usr/local/xqsim/xqsim --check-module provider` 加载
 `DataProviderKline.py` 时，在导入 `DataProviderMssql.py` 的 `pymssql` 处失败；
 同一批 `DataProvider*.py` 在 `uv` contributor 环境中可全部导入。这说明命名与
-模块依赖链有效，但当前共享 ELF 的冻结依赖不完整。需要在下一次发布前将
-`pymssql` 纳入 Provider 可用的运行依赖和 PyInstaller 收集范围，再用真实 ELF
-逐个执行 `--check-module provider`。在修复前只能用完整 contributor 环境构建
-期货缓存，不能让研究员通过现有 ELF 直接运行期货 Provider。
+模块依赖链有效，但当时共享 ELF 的冻结依赖不完整。2026-08-17 已将 `pymssql`、
+`pymysql` 纳入基础运行依赖、冻结 hidden imports 和真实 ELF Provider smoke test；
+以包含该修复的新 release 通过测试并激活为最终完成条件。旧 ELF 在升级前仍不能
+直接运行期货 Provider。
 
 ## 备注
 

@@ -197,6 +197,16 @@ def external_module_name(file_path: str) -> str:
     return "_xqsim_external_" + path_hash
 
 
+def prepend_sys_path(path: str) -> str:
+    """Place one trusted external-module root first on ``sys.path``."""
+
+    path = realpath(path)
+    if path in sys.path:
+        sys.path.remove(path)
+    sys.path.insert(0, path)
+    return path
+
+
 def dynamic_import(file_path: str, remove=True) -> ModuleType:
     file_path = realpath(file_path)
     if not os.path.isfile(file_path):

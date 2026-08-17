@@ -13,7 +13,7 @@ import tempfile
 from pathlib import Path
 
 
-PUBLIC_DIRS = ("operation", "stats", "provider", "config")
+PUBLIC_DIRS = ("operation", "stats", "provider", "portfolio", "config")
 DATA_DIRS = (
     Path("data", "futures", "cc"),
     Path("data", "futures", "cc_2024"),

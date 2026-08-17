@@ -46,6 +46,7 @@ MODULE_EXPORTS = {
     "operation": "Operation",
     "stats": "Stats",
     "provider": "Provider",
+    "portfolio": "Portfolio",
 }
 
 
@@ -81,7 +82,7 @@ def get_config_path():
         nargs=2,
         action="append",
         metavar=("TYPE", "FILE"),
-        help="validate an external alpha/operation/stats/provider module",
+        help="validate an external alpha/operation/stats/provider/portfolio module",
     )
     args = parser.parse_args()
 
@@ -101,6 +102,9 @@ def get_config_path():
 
 
 def main():
+    common_utils.prepend_sys_path(
+        os.environ.get("XQSIM_HOME", "/usr/local/xqsim")
+    )
     config_path = get_config_path()
 
     simulator = Simulator()

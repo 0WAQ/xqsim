@@ -1,12 +1,17 @@
+"""Reusable NumPy helpers for researcher modules."""
+
 import numpy as np
 
 
 def aggregate_member_product_position(
-    position, member,
-    pi_by_ii, real_contract_mask,
-    member_count, product_count,
+    position,
+    member,
+    pi_by_ii,
+    real_contract_mask,
+    member_count,
+    product_count,
 ):
-    """将单边 ``rank x ii`` 榜单聚合成 ``member x product`` 持仓。"""
+    """Aggregate one ``rank x ii`` position table into ``member x product``."""
 
     valid = (
         (member >= 0)

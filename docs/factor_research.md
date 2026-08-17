@@ -37,8 +37,8 @@
 
 权威语义来自
 `examples/alpha_demo/AlphaJrx_MemberSkillSectorPower2InvVol60_v001/`；
-`AlphaTest` 和 `AlphaNew` 仅是历史适配尝试，不作为依据。逐日实现位于
-`examples/alpha_demo/AlphaJrxDaily/`。
+`AlphaTest` 和 `AlphaNew` 仅是历史适配尝试，不作为依据。逐日实现保留在本地
+`examples/alpha_demo/AlphaJrxDaily/`，该研究员目录不纳入 Git。
 
 ```text
 rk.*[di-1]                         -> exposure[di-1]
@@ -48,7 +48,8 @@ member_skill + exposure[di-1]     -> vote -> ffill(3) -> v1[di]
 v1[di] + 当日 Operation 链        -> v2[di]
 ```
 
-会员榜单转换已从因子公式中拆出到 `AlphaJrxDaily/utils.py`：通用函数把
+会员榜单转换已从因子公式中拆出，并以 `public_modules/utils.py` 作为公共版本：
+通用函数把
 单边 `rank × ii` 榜单按会员和品种聚合为 `member × product` 持仓；
 因子的 `_aggregate_exposure` 再由多头、空头矩阵计算 `direction` 和
 `gross_share`。数据只覆盖公开 Top20，未上榜记录在当前口径下按零处理，
@@ -75,22 +76,26 @@ v1、v2 的有限值位置完全一致，相关系数均为 1.0，最大绝对�
 ## 公共研究模块
 
 研究员因子保留在自己的工作目录，导出 `Alpha` 或 `create`；可复用的公共实现
-经过审核后发布到 `/usr/local/xqsim/operation`、`stats`、`provider` 或
-`config`。三类 Python 公共模块分别导出 `Operation`、`Stats`、`Provider`，
-也可以导出 `create` 工厂。公共基类统一从 `xqsim.api` 导入。
+经过审核后发布到 `/usr/local/xqsim/operation`、`stats`、`provider`、
+`portfolio` 或 `config`；通用函数发布为根级 `utils.py`。插件分别导出
+`Operation`、`Stats`、`Provider`、`Portfolio`，也可以导出 `create` 工厂。
+公共基类统一从 `xqsim.api` 导入。
 
-配置优先使用 `${xqsim_operation}`、`${xqsim_stats}`、`${xqsim_provider}` 和
-`${xqsim_config}`，不要硬编码具体框架版本目录。提交公共模块时必须附最小配置、
+研究员配置统一使用 XML，并优先使用 `${xqsim_operation}`、`${xqsim_stats}`、
+`${xqsim_provider}`、`${xqsim_portfolio}` 和 `${xqsim_config}`，不要硬编码具体框架版本目录。提交公共模块时必须附最小配置、
 输入数据契约和验证结果；Provider 还要说明写入范围，且不得包含凭据。共享目录
 不是协作工作区：贡献应经过 Git 审核后部署，不能直接在线修改。
 
 当前公共清单包含通用/期货 Stats，以及 AlphaJrxDaily 已验证的行业中性、可用性
 过滤、逆波动加权、持有期平均、booksize 缩放和主力映射 Operation。公共模块文件名
 统一使用角色前缀加 PascalCase：`AlphaOpXxx.py`、`StatsXxx.py`、
-`DataProviderXxx.py`；例如 `${xqsim_operation}/AlphaOpSectorNeutralize.py`。
+`DataProviderXxx.py`、`PortfolioXxx.py`；例如
+`${xqsim_operation}/AlphaOpSectorNeutralize.py`。
 配置中的逻辑 `module_id` 无需与文件名相同。新增公共实现时提交源码并修改
 `public_modules/deploy.json`，校验与部署步骤统一见
 [部署手册](deployment.md)。
+研究员从零开始使用系统、编写模块和配置 XML 时，以
+[研究员使用手册](researcher_guide.md) 为准。
 
 每次研究记录应保存框架版本、配置、公共模块仓库 commit，以及运行时输出的模块
 SHA-256。同名文件可以存在于不同分类目录，加载器会按绝对路径隔离模块身份。

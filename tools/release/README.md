@@ -9,7 +9,8 @@ temporary directory at startup, so the target host must allow execution there.
 modules under `xqsim/` and also supplies frozen hidden imports. `build_cython.py`
 stages and verifies the binary wheel. `build_executable.py` freezes the installed
 wheel. The two smoke tests verify compiled imports and real ELF loading of
-external Alpha, Operation, Stats, and Provider modules.
+external Alpha, Operation, Stats, Provider, and Portfolio modules, including a
+factor importing the public root-level `utils.py`.
 
 `publish_release.py` creates immutable `releases/<version>/` directories and
 atomically activates the root `xqsim` symlink. It initializes, but never deletes

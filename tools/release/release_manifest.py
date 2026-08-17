@@ -73,6 +73,8 @@ FROZEN_HIDDEN_IMPORTS = tuple(
             "numcodecs",
             "numpy",
             "pandas",
+            "pymssql",
+            "pymysql",
             "sortedcollections",
             "sortedcontainers",
             "xmltodict",

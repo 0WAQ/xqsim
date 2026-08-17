@@ -12,7 +12,8 @@
 python tools/release/deploy.py --check-only
 ```
 
-校验通过后，原子部署 Operation、Stats、Provider 和 Config：
+校验通过后，原子部署 Operation、Stats、Provider、Portfolio、根级 utility 和
+Config：
 
 ```bash
 python tools/release/deploy.py
@@ -63,7 +64,8 @@ python -m json.tool /usr/local/xqsim/public-modules.json
 ```bash
 /usr/local/xqsim/xqsim \
   --check-module operation /usr/local/xqsim/operation/AlphaOpSectorNeutralize.py \
-  --check-module stats /usr/local/xqsim/stats/StatsFutures.py
+  --check-module stats /usr/local/xqsim/stats/StatsFutures.py \
+  --check-module portfolio /usr/local/xqsim/portfolio/PortfolioSimple.py
 ```
 
 校验某个不可变 release 的哈希：

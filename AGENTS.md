@@ -108,12 +108,14 @@ Console entry points (declared in `pyproject.toml`):
 
 ## Running the simulator
 
-The user-facing flow is config-driven, not code-driven. Researchers use the
+The user-facing flow is config-driven, not code-driven. New researcher
+configurations use XML only; YAML files are legacy operational inputs and must
+not be used in new researcher documentation or examples. Researchers use the
 deployed executable; contributors may use the editable environment:
 
 ```bash
-/usr/local/xqsim/xqsim -c <config.yml | config.xml>
-uv run xqsim -c <config.yml | config.xml>
+/usr/local/xqsim/xqsim -c Config.MyFactor.xml
+uv run xqsim -c Config.MyFactor.xml
 ```
 
 `xqsim_run.main` calls `Simulator.init_with_config_path(path)` which:
@@ -123,8 +125,9 @@ uv run xqsim -c <config.yml | config.xml>
 2. Substitutes `${...}` macros. `${config}` is the config-file directory;
    `${xqsim_modules}` is the bundled built-in module directory. The default
    external root is `/usr/local/xqsim` (override with `XQSIM_HOME` for tests),
-   exposed as `${xqsim_home}` plus `${xqsim_operation}`, `${xqsim_stats}`,
-   `${xqsim_provider}`, `${xqsim_config}`, and `${xqsim_data}`. `${xqsim_alpha}` remains a
+  exposed as `${xqsim_home}` plus `${xqsim_operation}`, `${xqsim_stats}`,
+  `${xqsim_provider}`, `${xqsim_portfolio}`, `${xqsim_config}`, `${xqsim_utils}`,
+  and `${xqsim_data}`. `${xqsim_alpha}` remains a
    compatibility macro but its directory is not created or managed.
 3. Walks four config sections in order — `global` → `provider` → `module` → `alpha` —
    wiring providers, alpha modules, ops, and stats into an `AlphaManager`.
@@ -257,16 +260,17 @@ or write a one-off `examples/module_demo/`-style script instead.
   runtime implementations normally compile to `.so`. Exclusions require a reason.
   Never bypass the manifest coverage check.
 - Public research modules live outside the executable under
-  `/usr/local/xqsim/{operation,stats,provider,config}`. Operation, Stats, and
-  Provider files export the same-named class or `create`; factor files remain in
+  `/usr/local/xqsim/{operation,stats,provider,portfolio,config}` plus root-level
+  `utils.py`. Operation, Stats, Provider, and Portfolio files export the
+  same-named class or `create`; factor files remain in
   researcher workspaces and export `Alpha` or `create`. The loader keys modules
   by absolute path, so equal filenames in different directories are valid.
   Python filenames use a role prefix plus PascalCase: `AlphaOpXxx.py`,
-  `StatsXxx.py`, and `DataProviderXxx.py`. Config `module_id` values are logical
+  `StatsXxx.py`, `DataProviderXxx.py`, and `PortfolioXxx.py`. Config `module_id` values are logical
   identifiers and do not need to match filenames. Linux paths are case-sensitive;
   rename the file and all YAML/XML/deployment references in one change.
-  Put directory-local reusable functions in lowercase `utils.py`; helper modules
-  are not required to use a role prefix and must not be registered as plugins.
+  Shared reusable functions live in `public_modules/utils.py` and deploy to root
+  `utils.py`; helper modules are not registered as plugins.
   Contributions must be reviewed and deployed rather than edited in place;
   credentials never belong in the Provider directory. Add shared files through
   `public_modules/deploy.json`; follow `docs/deployment.md` for validation and
@@ -283,6 +287,8 @@ the framework, including a future reader with no context from the current task.
   verification, rollback, isolated-test, and offline-build commands.
 - `docs/factor_research.md` — practical factor research, implementation, timing,
   adaptation, and validation guidance. Record reusable conclusions, not a coding log.
+- `docs/researcher_guide.md` — XML-only researcher instructions for running the
+  system, writing modules, understanding fields, and configuring experiments.
 - `docs/idea_keywords.md` — low-friction inbox for ideas or keywords that are not yet
   mature enough for the other documents. Include enough context to recover the idea.
 

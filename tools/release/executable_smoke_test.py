@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import subprocess
 import tempfile
 from pathlib import Path
@@ -14,14 +15,16 @@ MODULES = (
     ("operation", "Operation", "OperationBase", False),
     ("stats", "Stats", "StatsBase", False),
     ("provider", "Provider", "ProviderBase", True),
+    ("portfolio", "Portfolio", "PortfolioBase", True),
 )
 
 
-def run(command: list[str]) -> str:
+def run(command: list[str], *, env: dict[str, str] | None = None) -> str:
     completed = subprocess.run(
         command,
         check=False,
         text=True,
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
     )
@@ -48,6 +51,10 @@ def main() -> None:
 
     with tempfile.TemporaryDirectory(prefix="xqsim-external-modules.") as temp:
         root = Path(temp)
+        (root / "utils.py").write_text(
+            "def public_utility_value():\n    return 6\n",
+            encoding="utf-8",
+        )
         command = [str(executable)]
         for module_type, export_name, base_name, use_factory in MODULES:
             module_dir = root / module_type
@@ -59,6 +66,13 @@ def main() -> None:
                 f"class {export_name}({base_name}):\n"
                 "    smoke_value = int(np.arange(4).sum())\n"
             )
+            if module_type == "alpha":
+                source = (
+                    "from utils import public_utility_value\n"
+                    f"from xqsim.api import {base_name}\n\n"
+                    f"class {export_name}({base_name}):\n"
+                    "    smoke_value = public_utility_value()\n"
+                )
             if use_factory:
                 source = (
                     "import numpy as np\n"
@@ -68,12 +82,22 @@ def main() -> None:
                     "def create(*args, **kwargs):\n"
                     "    return FactoryObject(*args, **kwargs)\n"
                 )
+            if module_type == "provider":
+                source = (
+                    "import pymssql\n"
+                    "import pymysql\n"
+                    f"from xqsim.api import {base_name}\n\n"
+                    f"class {export_name}({base_name}):\n"
+                    "    smoke_value = bool(pymssql) and bool(pymysql)\n"
+                )
             module_path.write_text(source, encoding="utf-8")
             command.extend(
                 ["--check-module", module_type, str(module_path)]
             )
 
-        module_output = run(command)
+        smoke_env = os.environ.copy()
+        smoke_env["XQSIM_HOME"] = str(root)
+        module_output = run(command, env=smoke_env)
         for module_type, _, _, _ in MODULES:
             marker = f"checked {module_type} module"
             if marker not in module_output:

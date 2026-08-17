@@ -32,6 +32,15 @@
     {
       "type": "stats",
       "source": "xqsim/modules/StatsFutures.py"
+    },
+    {
+      "type": "portfolio",
+      "source": "public_modules/portfolio/PortfolioSimple.py"
+    },
+    {
+      "type": "utility",
+      "source": "public_modules/utils.py",
+      "target": "utils.py"
     }
   ]
 }

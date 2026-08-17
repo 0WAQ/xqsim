@@ -93,3 +93,6 @@ result.log
 !.env.example
 
 data/
+
+# Researcher-owned factor adaptations remain local and are not versioned.
+examples/alpha_demo/AlphaJrxDaily/

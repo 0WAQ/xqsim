@@ -8,8 +8,8 @@ class PortfolioSimple(PortfolioBase):
 
     def generate_portfolio(self, didx, alpha_list):
         self.alpha = np.mean(np.array(alpha_list), axis=0)
-        print(alpha_list)
-        print(self.alpha)
+        # print(alpha_list)
+        # print(self.alpha)
 
 
 def create(*args):

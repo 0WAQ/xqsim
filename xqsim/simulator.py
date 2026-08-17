@@ -31,7 +31,7 @@ def dictify(r, root=True):
 class Simulator(object):
     def __init__(self):
         self.__xqsim_path = os.path.abspath(os.path.dirname(__file__))
-        self.__xqsim_home = common_utils.realpath(
+        self.__xqsim_home = common_utils.prepend_sys_path(
             os.environ.get("XQSIM_HOME", "/usr/local/xqsim")
         )
         self.__macro_dict = {
@@ -39,9 +39,14 @@ class Simulator(object):
                 self.__xqsim_path, "modules"
             ).replace("\\", "/"),
             "xqsim_home": self.__xqsim_home.replace("\\", "/"),
+            "xqsim_utils": os.path.join(
+                self.__xqsim_home, "utils.py"
+            ).replace("\\", "/"),
             "xqsim_data": os.path.join(self.__xqsim_home, "data").replace("\\", "/"),
         }
-        for module_type in ("alpha", "operation", "stats", "provider", "config"):
+        for module_type in (
+            "alpha", "operation", "stats", "provider", "portfolio", "config"
+        ):
             self.__macro_dict["xqsim_" + module_type] = os.path.join(
                 self.__xqsim_home, module_type
             ).replace("\\", "/")
