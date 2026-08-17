@@ -293,8 +293,8 @@ def build(args: argparse.Namespace) -> Path:
         shutil.which("uv") or "uv",
         "build",
         "--wheel",
-        "--clear",
-        "--no-create-gitignore",
+        # raw_wheels is freshly created above, so version-specific cleanup
+        # and gitignore flags are unnecessary.
         "--python",
         sys.executable,
         "--out-dir",
