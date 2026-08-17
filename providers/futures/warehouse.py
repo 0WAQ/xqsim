@@ -10,7 +10,7 @@ import numpy as np
 from numpy import nan
 
 from mssql_provider import MssqlProvider
-from futures_common import convert_product, SLOTS_SIZE
+from futures_common import FUTURES_CC_DIR, convert_product, SLOTS_SIZE
 from xqsim.xqsim_run import builder_run
 
 WAREHOUSE_SQL = """\
@@ -64,8 +64,8 @@ class Provider(MssqlProvider):
 
 
 def main():
-    builder_run(meta_dir="./data/futures/cc", begin_date="TODAY-5", end_date="TODAY",
-                output_cache_dir="./data/futures/cc", index_category="FUTURES", data_dir="")
+    builder_run(meta_dir=FUTURES_CC_DIR, begin_date="TODAY-5", end_date="TODAY",
+                output_cache_dir=FUTURES_CC_DIR, index_category="FUTURES", data_dir="")
 
 
 if __name__ == '__main__':

@@ -1,4 +1,5 @@
 from static_provider import *
+from stocks_common import STOCKS_CC_DIR, STOCKS_UPDATE_DIR
 from xqsim.xqsim_run import builder_run
 from sortedcollections import SortedDict, SortedList
 
@@ -104,7 +105,7 @@ class Provider(StaticProvider):
 
 
 def main():
-    builder_run(meta_dir="../cc", begin_date=20170101, end_date=20170228, output_cache_dir="./cc_update", table="ASHAREINCOME", abbr="ic")
+    builder_run(meta_dir=STOCKS_CC_DIR, begin_date=20170101, end_date=20170228, output_cache_dir=STOCKS_UPDATE_DIR, table="ASHAREINCOME", abbr="ic")
 
 
 if __name__ == '__main__':

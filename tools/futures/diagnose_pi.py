@@ -2,7 +2,7 @@
 # 代码、以及两侧采样值。
 # 用法: uv run python tools/futures/diagnose_pi.py --tag wh.deliverable \
 #       --ldcta /production/qsim/LDCTA/QNCTACC2026MSSQL/ \
-#       --cache data/futures/cc/ --meta data/futures/cc
+#       --cache /usr/local/xqsim/data/futures/cc --meta /usr/local/xqsim/data/futures/cc
 import argparse
 import os
 import sys
@@ -16,11 +16,14 @@ from xqsim.xqsim_run import init_dr
 
 
 def main():
+    futures_cc = os.path.join(
+        os.path.realpath(os.environ.get("XQSIM_DATA_HOME", "/usr/local/xqsim/data")),
+        "futures", "cc")
     parser = argparse.ArgumentParser()
     parser.add_argument("--tag", required=True)
     parser.add_argument("--ldcta", required=True)
-    parser.add_argument("--cache", required=True)
-    parser.add_argument("--meta", required=True)
+    parser.add_argument("--cache", default=futures_cc)
+    parser.add_argument("--meta", default=futures_cc)
     parser.add_argument("--calendar", default=None)
     args = parser.parse_args()
 

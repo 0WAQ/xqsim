@@ -1,10 +1,11 @@
 macro:
-  provider_path: "../../providers"
+  provider_path: "./providers/stocks"
+  data_root: "/usr/local/xqsim/data"
 
 global:
-  meta_dir: "../../providers/cc"
-  dst_cache_dir: "../../providers/cc"
-  output_cache_dir: "${provider_path}/cc_update"
+  meta_dir: "${data_root}/stocks/cc"
+  dst_cache_dir: "${data_root}/stocks/cc"
+  output_cache_dir: "${data_root}/stocks/cc_update_debug"
   build: true
 
 meta_updater: "${provider_path}/meta_updater.py"

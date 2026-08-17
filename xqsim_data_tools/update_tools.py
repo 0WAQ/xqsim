@@ -5,10 +5,16 @@ from functools import wraps
 from xqsim.data.data_manager import *
 from xqsim.xqsim_run import init_dr
 
+DEFAULT_STOCKS_CC_DIR = os.path.join(
+    os.path.realpath(os.environ.get("XQSIM_DATA_HOME", "/usr/local/xqsim/data")),
+    "stocks",
+    "cc",
+)
+
 
 def menu():
     file_name = os.path.abspath(os.path.basename(__file__))
-    print("python %s meta=[meta_dir(default is /cc)] action=[action] **kwargs" % file_name)
+    print("python %s meta=[meta_dir(default is %s)] action=[action] **kwargs" % (file_name, DEFAULT_STOCKS_CC_DIR))
     print("action=show dst=[to_show_path]")
     print("action=check dst=[to_check_path]")
     print("action=merge dst=[dst_path] src=[src_path]")
@@ -209,10 +215,18 @@ def cli():
 
 
 def init(f):
+    @click.option(
+        '--index-category',
+        type=click.Choice(['ASHARE', 'FUTURES'], case_sensitive=False),
+        default='ASHARE',
+        show_default=True,
+        help='Instrument index category',
+    )
     @wraps(f)
     def decorated(*args, **kwargs):
         meta_dir = kwargs.get("meta")
-        dr = init_dr(meta_dir=meta_dir, total=True)
+        index_category = kwargs.pop("index_category")
+        dr = init_dr(meta_dir=meta_dir, total=True, index_category=index_category)
         kwargs["meta_cls"] = dr.meta
         return f(*args, **kwargs)
 
@@ -220,7 +234,7 @@ def init(f):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Show dst path", required=True)
 @init
 def show(**config):
@@ -228,7 +242,7 @@ def show(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Check dst path", required=True)
 @click.option('--begin_date', '-b', help="Check begin date", required=True)
 @click.option('--end_date', '-e', help="Check end date", required=True)
@@ -238,7 +252,7 @@ def check(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Check dir path", required=True)
 @click.option('--begin_date', '-b', help="Check begin date", required=True)
 @click.option('--end_date', '-e', help="Check end date", required=True)
@@ -248,7 +262,7 @@ def check_dir(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Check cc path", required=True)
 @click.option('--begin_date', '-b', help="Check begin date", required=True)
 @click.option('--end_date', '-e', help="Check end date", required=True)
@@ -258,7 +272,7 @@ def check_cc(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Merge dst path", required=True)
 @click.option('--src', '-s', help="Merge src path", required=True)
 @init
@@ -267,7 +281,7 @@ def merge(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Merge dst dir", required=True)
 @click.option('--src', '-s', help="Merge src dir", required=True)
 @init
@@ -276,7 +290,7 @@ def merge_dir(**config):
 
 
 @cli.command()
-@click.option('--meta', '-m', help='Meta dir, default is /cc', default="/cc")
+@click.option('--meta', '-m', help='Meta dir', default=DEFAULT_STOCKS_CC_DIR, show_default=True)
 @click.option('--dst', '-d', help="Merge dst cc", required=True)
 @click.option('--src', '-s', help="Merge src cc", required=True)
 @init

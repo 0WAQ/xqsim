@@ -14,7 +14,7 @@
 #   meta/enum/Enum_member.csv       会员 enum (id 只增不改, positions_rank cube 用)
 #   meta/time_index/                空目录 (loader 要求存在)
 #
-# 用法: python meta_updater.py [meta_dir]   (默认 ./data/futures/cc, 需先配好 mssql.json)
+# 用法: python meta_updater.py [meta_dir]   (默认 $XQSIM_DATA_HOME/futures/cc)
 import bisect
 import json
 import os
@@ -22,7 +22,8 @@ import sys
 
 import pymssql
 
-from futures_common import SLOTS_SIZE, HOT_SLOT, convert_product, member_key, load_or_extend_member_enum
+from futures_common import (FUTURES_CC_DIR, SLOTS_SIZE, HOT_SLOT, convert_product,
+                            member_key, load_or_extend_member_enum)
 
 II_SIZE = 4000
 FAR_END_DATE = "20891231"
@@ -198,7 +199,7 @@ class MetaUpdater(object):
 
 
 def main():
-    meta_dir = sys.argv[1] if len(sys.argv) >= 2 else "./data/futures/cc"
+    meta_dir = sys.argv[1] if len(sys.argv) >= 2 else FUTURES_CC_DIR
     MetaUpdater(meta_dir).run()
 
 

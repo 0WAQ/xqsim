@@ -14,11 +14,13 @@ Public research modules live in the adjacent directories:
 - `config/`: shared configuration examples.
 
 Configurations may use the built-in macros `${xqsim_operation}`,
-`${xqsim_stats}`, `${xqsim_provider}`, and `${xqsim_config}`. Factor code and
+`${xqsim_stats}`, `${xqsim_provider}`, `${xqsim_config}`, and `${xqsim_data}`.
+Shared caches live under `data/stocks/cc` and `data/futures/cc`. Factor code and
 outputs remain in the researcher's own workspace; factor files export `Alpha`
 or `create` and are referenced by their own paths.
 
 Do not edit these shared directories directly. Contribute through the reviewed
-public-module repository, then deploy an approved snapshot. Provider code must
+public-module repository, then deploy an approved snapshot. Data is managed by
+provider and update scripts, not by the release publisher. Provider code must
 never contain database credentials. `public-modules.json` records the deployed
 source commit and SHA-256 for every managed file.

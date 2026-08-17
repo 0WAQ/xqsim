@@ -4,6 +4,11 @@
 import os
 import re
 
+XQSIM_DATA_HOME = os.path.realpath(
+    os.environ.get("XQSIM_DATA_HOME", "/usr/local/xqsim/data")
+)
+FUTURES_CC_DIR = os.path.join(XQSIM_DATA_HOME, "futures", "cc")
+
 # 槽位布局常量: ii = pi * 50 + slot
 SLOTS_SIZE = 50
 HOT_SLOT = 48     # 主力合约拷贝槽

@@ -6,14 +6,14 @@
 #   ind.sector  粗行业 (CTA sector) enum id, 未收录品种 -1
 # enum 落 meta/enum/Enum_industry_l1.csv / Enum_sector.csv (id 只增不改)
 # 注意: 静态表, 生产 do_generate 目录存在即跳过; 表变更或缓存延伸后需
-#   rm -rf data/futures/cc/Industry 重跑本文件重建
+#   清理 $XQSIM_DATA_HOME/futures/cc/Industry 后重跑本文件重建
 import os
 
 import numpy as np
 import pandas as pd
 
 from mssql_provider import MssqlProvider
-from futures_common import SLOTS_SIZE, load_or_extend_member_enum
+from futures_common import FUTURES_CC_DIR, SLOTS_SIZE, load_or_extend_member_enum
 from xqsim.xqsim_run import builder_run
 
 INDUSTRY_CSV = os.path.join(os.path.dirname(os.path.abspath(__file__)), "industries.csv")
@@ -48,8 +48,8 @@ class Provider(MssqlProvider):
 
 
 def main():
-    builder_run(meta_dir="./data/futures/cc", begin_date="20160104", end_date="TODAY",
-                output_cache_dir="./data/futures/cc", index_category="FUTURES", data_dir="")
+    builder_run(meta_dir=FUTURES_CC_DIR, begin_date="20160104", end_date="TODAY",
+                output_cache_dir=FUTURES_CC_DIR, index_category="FUTURES", data_dir="")
 
 
 if __name__ == '__main__':

@@ -1,12 +1,12 @@
 # 期货生产 build 配置 (从 repo 根目录运行: uv run xqsim -c providers/futures/config_production.yml)
 # 前置: providers/futures/mssql.json 填好真实凭证;
-#       先跑 providers/futures/meta_updater.py 生成 data/futures/cc/meta
+#       先跑 providers/futures/meta_updater.py 生成 ${xqsim_data}/futures/cc/meta
 macro:
-  provider_dir: "./providers/futures"
+  provider_dir: "${config}"
 
 global:
-  meta_dir: "./data/futures/cc"
-  output_cache_dir: "./data/futures/cc"
+  meta_dir: "${xqsim_data}/futures/cc"
+  output_cache_dir: "${xqsim_data}/futures/cc"
   # 扁平布局: 数据目录 (Hot/KLine/...) 直接挂在 cc 下与 meta 同级, 不要 Data 层
   data_dir: ""
   begin_date: "20160101"

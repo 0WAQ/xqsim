@@ -1,9 +1,9 @@
 macro:
-  provider_dir: "/home/bsim/data_provider"
+  provider_dir: "${config}"
 
 global:
-  meta_dir: "/cc"
-  output_cache_dir: "/srv/data/cc_single"
+  meta_dir: "${xqsim_data}/stocks/cc"
+  output_cache_dir: "${xqsim_data}/stocks/cc_single"
   begin_date: "20130101"
   end_date: "TODAY"
   build: true

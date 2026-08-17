@@ -1,9 +1,9 @@
 macro:
-  provider_dir: "/home/michael/data_provider"
+  provider_dir: "${config}"
 
 global:
-  meta_dir: "./cc"
-  output_cache_dir: "${provider_dir}/cc_update"
+  meta_dir: "${xqsim_data}/stocks/cc"
+  output_cache_dir: "${xqsim_data}/stocks/cc_update"
   begin_date: "TODAY-10"
   end_date: "TODAY-1"
   build: true

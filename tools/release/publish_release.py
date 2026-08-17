@@ -14,6 +14,7 @@ from pathlib import Path
 
 
 PUBLIC_DIRS = ("operation", "stats", "provider", "config")
+DATA_DIRS = (Path("data", "stocks", "cc"), Path("data", "futures", "cc"))
 PUBLIC_README = Path(__file__).with_name("PUBLIC_MODULES.md")
 
 
@@ -61,6 +62,11 @@ def initialize_public_dirs(publish_root: Path) -> None:
             raise RuntimeError(f"public module path is not a directory: {path}")
         path.mkdir(exist_ok=True)
         path.chmod(0o755)
+    for relative in DATA_DIRS:
+        path = publish_root / relative
+        if path.exists() and not path.is_dir():
+            raise RuntimeError(f"runtime data path is not a directory: {path}")
+        path.mkdir(parents=True, exist_ok=True)
     readme = publish_root / "README.md"
     if readme.exists() and not readme.is_file():
         raise RuntimeError(f"runtime README path is not a file: {readme}")

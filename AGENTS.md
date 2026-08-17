@@ -29,10 +29,9 @@ xqsim-py/
 ├── public_modules/        # reviewed researcher-visible modules + deploy allowlist
 │   ├── deploy.json        # explicit source -> public runtime target mapping
 │   └── operation/         # canonical public Operation implementations
-├── data/                  # 本地数据 (meta 索引等, 不 pip 安装)
-│   ├── stocks/cc/meta/    # 股票 cache index CSVs (DateIndex / InstrumentIndex / ...)
-│   └── futures/           # 期货 cc: meta/ 与数据目录 (Hot/KLine/...) 扁平同级
-│                          # (config 里 data_dir: "", 无 Data 层); meta 由 meta_updater.py 生成
+├── data/                  # 仓库内 bootstrap/迁移源，不是生产运行路径
+│   ├── stocks/cc/meta/    # Git 跟踪的股票 meta 引导数据
+│   └── futures/           # 本地回退副本；生产数据在 /usr/local/xqsim/data
 ├── examples/              # sample configs and demo modules referenced by configs
 │   ├── sample_config.yml
 │   ├── sample_config.xml
@@ -125,7 +124,7 @@ uv run xqsim -c <config.yml | config.xml>
    `${xqsim_modules}` is the bundled built-in module directory. The default
    external root is `/usr/local/xqsim` (override with `XQSIM_HOME` for tests),
    exposed as `${xqsim_home}` plus `${xqsim_operation}`, `${xqsim_stats}`,
-   `${xqsim_provider}`, and `${xqsim_config}`. `${xqsim_alpha}` remains a
+   `${xqsim_provider}`, `${xqsim_config}`, and `${xqsim_data}`. `${xqsim_alpha}` remains a
    compatibility macro but its directory is not created or managed.
 3. Walks four config sections in order — `global` → `provider` → `module` → `alpha` —
    wiring providers, alpha modules, ops, and stats into an `AlphaManager`.
@@ -139,8 +138,9 @@ The same simulator can also be driven from a Python module by calling
 the cache without simulating. See `providers/stocks/config_production.yml` for the canonical
 "build only" config.
 
-Futures side: generate meta first (`uv run python providers/futures/meta_updater.py
-./data/futures/cc`, needs MSSQL access + `providers/futures/mssql.json`), then
+Futures side: generate meta first (`uv run python providers/futures/meta_updater.py`,
+defaults to `/usr/local/xqsim/data/futures/cc` and needs MSSQL access plus
+`providers/futures/mssql.json`), then
 `uv run xqsim -c providers/futures/config_production.yml` (needs `index_category: FUTURES`
 + `adj_window: -1`, already in that config). Consistency against the legacy ldcta cache
 is verified with `tools/futures/compare_ldcta.py`; semantics and validation results are
@@ -199,7 +199,8 @@ followed by the raw numpy data. Providers write via `ProviderBase.write_data` /
 - `update_tools` CLI exposes `show / check / merge / merge_dir` for inspecting and
   combining cache directories produced by providers. Use it after a `build: true` run
   to validate header consistency and merge an `output_cache_dir` into the production
-  `meta_dir`.
+  `meta_dir`. Pass `--index-category FUTURES` with a futures `--meta` path; the default
+  category and path are the stock cache.
 - `prefect_task.py` defines the Prefect tasks that orchestrate daily updates.
   Uses Prefect 3.x (`@flow` / `@task` decorators, `get_run_logger()`,
   `flow.serve(cron=...)` for scheduling, `run_deployment()` for sub-flows).
@@ -217,7 +218,7 @@ There is no `pytest` suite. Tests are HTML-report unit tests over a built data c
 uv run python tools/ut/ut_run.py
 ```
 
-`ut_run.py` instantiates a `dr` against `meta_dir=/cc` for a small date window
+`ut_run.py` instantiates a `dr` against `/usr/local/xqsim/data/stocks/cc` for a small date window
 (`TODAY-2` → `TODAY-1`) and registers test classes from `tools/ut/ut_cls/` (`universe`,
 `kline`, `nan`, optionally `cw`, `citics_index`, `bar`). To run a single suite, edit
 the `html_runner.add_module(...)` calls or use
@@ -229,10 +230,11 @@ or write a one-off `examples/module_demo/`-style script instead.
 
 ## Conventions worth knowing
 
-- `meta_dir` is conventionally `/cc`; provider output goes to `output_cache_dir`
-  (often `./cc_update` or `/cc_update`) and is merged into `/cc` by
-  `update_tools merge_dir`. Don't write straight into `/cc` from a provider.
-  **期货例外**:`data/futures/cc` 直接作为 `output_cache_dir`,且
+- Runtime data lives under `/usr/local/xqsim/data` (override standalone Python
+  tools with `XQSIM_DATA_HOME`). Stocks use `stocks/cc` as production and
+  `stocks/cc_update` as provider output, merged by `update_tools`; do not write
+  stock providers straight into production. **期货例外**:`futures/cc` 直接作为
+  `output_cache_dir`,且
   `data_dir: ""`(扁平布局,数据目录与 `meta/` 同级,无 `Data/` 层);
   扫描与写出路径都按 `meta` 的 `data_dir` para 走,股票侧默认 `Data` 不变。
 - Date strings `"TODAY-N"` and `"TODAY+N"` are resolved by the loader; pass them

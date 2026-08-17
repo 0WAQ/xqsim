@@ -110,5 +110,39 @@ OUTPUT=/tmp/xqsim-release-offline \
 bash tools/release/release.sh
 ```
 
-Provider 源码不得包含数据库凭据；缓存、checkpoint、个人因子和运行输出均不属于
-框架安装目录。
+## 数据目录与生成
+
+共享运行数据与 ELF 使用同一根目录，但不进入不可变 release：
+
+```text
+/usr/local/xqsim/data/
+├── stocks/cc/          # 股票生产缓存
+├── stocks/cc_update/   # 股票 Provider 临时产出，校验后合并
+└── futures/cc/         # 期货扁平缓存，数据目录与 meta/ 同级
+```
+
+首次迁移保留源数据，并用全量 checksum 验证：
+
+```bash
+rsync -a data/ /usr/local/xqsim/data/
+rsync -a --checksum --dry-run --itemize-changes data/ /usr/local/xqsim/data/
+```
+
+第二条命令无输出即内容一致。生成期货数据时先更新 meta，再运行 build 配置：
+
+```bash
+uv run python providers/futures/meta_updater.py
+uv run xqsim -c providers/futures/config_production.yml
+```
+
+股票使用 `providers/stocks/config_production.yml` 生成 `stocks/cc_update`，校验后再
+合入 `stocks/cc`。配置统一使用 `${xqsim_data}`；独立 Python 工具默认读取
+`/usr/local/xqsim/data`，测试其他根目录时设置 `XQSIM_DATA_HOME`。
+期货缓存使用 `update_tools` 时同时传
+`--meta /usr/local/xqsim/data/futures/cc --index-category FUTURES`。
+
+仓库携带的股票 bootstrap 日历目前止于 2022-12-30，只用于初始化目录；在当前日期
+运行股票校验或回测前，必须先用 `providers/stocks/meta_updater.py` 刷新生产 meta。
+
+发布框架只创建并保留数据目录，不复制、删除或回滚数据。Provider 源码不得包含
+数据库凭据；checkpoint、个人因子和运行输出仍不属于共享安装目录。

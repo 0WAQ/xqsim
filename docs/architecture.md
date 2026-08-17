@@ -312,7 +312,7 @@ Provider 通过配置注册，在回测前的 build 阶段运行：
 
 ```xml
 <QSim>
-    <Constants build="true" niodatapath="/cc"/>
+    <Constants build="true" niodatapath="/usr/local/xqsim/data/stocks/cc"/>
     <Modules>
         <Module id="KLine" path="./kline.py" handler="ProviderHandler"/>
         <Module id="Universe" path="./universe.py" handler="ProviderHandler"/>
@@ -323,14 +323,17 @@ Provider 通过配置注册，在回测前的 build 阶段运行：
 数据流向：
 
 ```
-MySQL / CSV → Provider.generate() → output_cache_dir → merge → 生产缓存 (/cc)
+MySQL / CSV → Provider.generate() → output_cache_dir → merge → 生产缓存 (data/stocks/cc)
                                                                      ↓
                                                         DataRepository.get_data()
                                                                      ↓
                                                               Alpha / Stats
 ```
 
-Provider 产出写入临时目录（`output_cache_dir`），通过 `update_tools merge_dir` 合入生产缓存，不直接写生产目录。
+运行时数据根目录默认为 `/usr/local/xqsim/data`。配置可用 `${xqsim_data}`；独立
+provider/校验脚本可用 `XQSIM_DATA_HOME` 覆盖。股票 Provider 写
+`stocks/cc_update`，通过 `update_tools merge_dir` 合入 `stocks/cc`，不直接写生产
+目录。期货采用扁平缓存，Provider 直接写 `futures/cc`，数据目录与 `meta/` 同级。
 
 ---
 
@@ -363,7 +366,7 @@ Provider 产出写入临时目录（`output_cache_dir`），通过 `update_tools
 ```xml
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <QSim>
-    <Constants backdays="20" niodatapath="/cc" adj_window="5"/>
+    <Constants backdays="20" niodatapath="/usr/local/xqsim/data/stocks/cc" adj_window="5"/>
     <Universe startdate="20220101" enddate="20221231"/>
 
     <!-- 注册模块 -->

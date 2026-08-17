@@ -6,7 +6,7 @@
 # 裁剪: ldcta 的 universe.index/commodity/product 三个标签从未被使用
 #   (index 槽十年无数据, commodity 恒 true), 不移植。
 from mssql_provider import MssqlProvider
-from futures_common import SLOTS_SIZE, HOT_SLOT
+from futures_common import FUTURES_CC_DIR, SLOTS_SIZE, HOT_SLOT
 from xqsim.xqsim_run import builder_run
 import numpy as np
 
@@ -33,8 +33,8 @@ class Provider(MssqlProvider):
 
 
 def main():
-    builder_run(meta_dir="./data/futures/cc", begin_date="TODAY-5", end_date="TODAY",
-                output_cache_dir="./data/futures/cc", index_category="FUTURES", data_dir="")
+    builder_run(meta_dir=FUTURES_CC_DIR, begin_date="TODAY-5", end_date="TODAY",
+                output_cache_dir=FUTURES_CC_DIR, index_category="FUTURES", data_dir="")
 
 
 if __name__ == '__main__':

@@ -14,7 +14,7 @@
 #     open 也缺则 NaN
 #   - 最后按 hot_builder 的主力映射把主力合约数据拷贝进 48 号槽
 from mssql_provider import MssqlProvider
-from futures_common import convert_to_standard_code, SLOTS_SIZE, HOT_SLOT
+from futures_common import FUTURES_CC_DIR, convert_to_standard_code, SLOTS_SIZE, HOT_SLOT
 from hot_builder import build_hot_map
 from xqsim.xqsim_run import builder_run
 import numpy as np
@@ -120,8 +120,8 @@ class Provider(MssqlProvider):
 
 
 def main():
-    builder_run(meta_dir="./data/futures/cc", begin_date="TODAY-5", end_date="TODAY",
-                output_cache_dir="./data/futures/cc", index_category="FUTURES", data_dir="")
+    builder_run(meta_dir=FUTURES_CC_DIR, begin_date="TODAY-5", end_date="TODAY",
+                output_cache_dir=FUTURES_CC_DIR, index_category="FUTURES", data_dir="")
 
 
 if __name__ == '__main__':

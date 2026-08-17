@@ -1,9 +1,9 @@
 macro:
-  provider_dir: "."
+  provider_dir: "${config}"
 
 global:
-  meta_dir: "/cc"
-  output_cache_dir: "${provider_dir}/cc_temp"
+  meta_dir: "${xqsim_data}/stocks/cc"
+  output_cache_dir: "${xqsim_data}/stocks/cc_temp"
   begin_date: "20170103"
   end_date: "20210108"
   data_limit: 4

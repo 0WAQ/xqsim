@@ -1,4 +1,5 @@
 import os
+from stocks_common import STOCKS_CC_DIR
 import pymysql
 import pandas as pd
 from xqsim import common_utils
@@ -96,8 +97,7 @@ def run(meta_dir):
 
 
 def main():
-    meta_dir = "./cc"
-    run(meta_dir)
+    run(STOCKS_CC_DIR)
 
 
 if __name__ == '__main__':

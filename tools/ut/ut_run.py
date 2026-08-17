@@ -1,4 +1,5 @@
 import importlib
+import os
 import HTMLTestRunner
 import unittest
 from xqsim.alpha_base import *
@@ -72,7 +73,8 @@ class HTMLRunner(object):
 
 
 if __name__ == '__main__':
-    meta_dir = "/cc"
+    data_home = os.path.realpath(os.environ.get("XQSIM_DATA_HOME", "/usr/local/xqsim/data"))
+    meta_dir = os.path.join(data_home, "stocks", "cc")
     begin_date = "TODAY-2"
     end_date = "TODAY-1"
     # begin_date = 20170103

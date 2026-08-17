@@ -39,6 +39,7 @@ class Simulator(object):
                 self.__xqsim_path, "modules"
             ).replace("\\", "/"),
             "xqsim_home": self.__xqsim_home.replace("\\", "/"),
+            "xqsim_data": os.path.join(self.__xqsim_home, "data").replace("\\", "/"),
         }
         for module_type in ("alpha", "operation", "stats", "provider", "config"):
             self.__macro_dict["xqsim_" + module_type] = os.path.join(

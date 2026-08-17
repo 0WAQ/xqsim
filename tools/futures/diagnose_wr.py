@@ -32,7 +32,8 @@ for r in cur.fetchall()[:10]:
     print(r)
 
 print("== 3. 我的 InstrumentIndex.csv 里 ii=1035/1040 及 wr/WR 相关行")
-idx_path = os.path.join(os.path.dirname(__file__), "../../data/futures/cc/meta/index/InstrumentIndex.csv")
+data_home = os.path.realpath(os.environ.get("XQSIM_DATA_HOME", "/usr/local/xqsim/data"))
+idx_path = os.path.join(data_home, "futures", "cc", "meta", "index", "InstrumentIndex.csv")
 with open(idx_path) as f:
     for line in f:
         parts = line.split(",")
