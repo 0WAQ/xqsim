@@ -378,7 +378,7 @@ provider/校验脚本可用 `XQSIM_DATA_HOME` 覆盖。股票 Provider 写
         <Module id="OpPower" path="./AlphaOpPower.py" handler="AlphaOpsHandler"/>
         <Module id="OpDecay" path="./AlphaOpEmaDecay.py" handler="AlphaOpsHandler"/>
         <Module id="OpNeut" path="./AlphaOpRiskNeut.py" handler="AlphaOpsHandler"/>
-        <Module id="Stats" path="${xqsim_modules}/StatsGeneral.py" handler="StatsRegistry"/>
+        <Module id="Stats" path="${xqsim_stats}/StatsGeneral.py" handler="StatsRegistry"/>
     </Modules>
 
     <!-- 回测任务: 因子 + Operator链 + Stats -->

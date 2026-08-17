@@ -28,11 +28,14 @@ xqsim-py/
 │       └── mssql.json
 ├── public_modules/        # reviewed researcher-visible modules + deploy allowlist
 │   ├── deploy.json        # explicit source -> public runtime target mapping
-│   └── operation/         # canonical public Operation implementations
+│   ├── operation/         # canonical public Operation implementations
+│   ├── stats/             # canonical public Stats implementations
+│   ├── portfolio/         # canonical public Portfolio implementations
+│   └── utils.py           # canonical public NumPy helpers
 ├── data/                  # 仓库内 bootstrap/迁移源，不是生产运行路径
 │   ├── stocks/cc/meta/    # Git 跟踪的股票 meta 引导数据
 │   └── futures/           # 本地回退副本；生产数据在 /usr/local/xqsim/data
-├── examples/              # sample configs and demo modules referenced by configs
+├── examples/              # usage demonstrations only; never canonical/deployed sources
 │   ├── sample_config.yml
 │   ├── sample_config.xml
 │   └── module_demo/       # alpha_demo / op_demo / portfolio_simple ...
@@ -271,6 +274,9 @@ or write a one-off `examples/module_demo/`-style script instead.
   rename the file and all YAML/XML/deployment references in one change.
   Shared reusable functions live in `public_modules/utils.py` and deploy to root
   `utils.py`; helper modules are not registered as plugins.
+  `public_modules/` is authoritative for shared researcher modules; `examples/`
+  only supplements documentation. Package copies of public Stats must remain
+  byte-identical to `public_modules/stats/` and are checked during release.
   Contributions must be reviewed and deployed rather than edited in place;
   credentials never belong in the Provider directory. Add shared files through
   `public_modules/deploy.json`; follow `docs/deployment.md` for validation and

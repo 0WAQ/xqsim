@@ -29,6 +29,14 @@ SOURCE_MODULES = (
     "xqsim.xqsim_run",
 )
 
+# Shared Stats implementations are authored under public_modules/. The package
+# paths remain as wheel/ELF mirrors; build_cython.validate_manifest rejects any
+# content drift before a release can be built.
+PUBLIC_SOURCE_MIRRORS = {
+    "xqsim.modules.StatsGeneral": "public_modules/stats/StatsGeneral.py",
+    "xqsim.modules.StatsFutures": "public_modules/stats/StatsFutures.py",
+}
+
 # Internal runtime implementation. These modules become CPython extension
 # modules (.so on Linux, .pyd on Windows) inside the platform wheel.
 COMPILED_MODULES = (

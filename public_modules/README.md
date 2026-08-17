@@ -4,12 +4,15 @@ This directory contains researcher-visible modules maintained with the
 framework. `deploy.json` is the authoritative allowlist for files copied into
 `/usr/local/xqsim/{operation,stats,provider,config}`.
 
-Researcher-facing Operation, Portfolio, and utility sources live here. Existing
-framework Stats modules remain canonical under `xqsim/modules/` and are
-referenced by the manifest instead of duplicated. Add a module by committing
-its source and one explicit manifest entry; never place credentials or personal
-factor code in this directory. `examples/` may demonstrate usage but must not be
-used as a deployment source.
+Researcher-facing Operation, Stats, Portfolio, and utility sources live here.
+This directory is the authoritative source for shared researcher modules.
+`xqsim/modules/Stats*.py` are packaging mirrors required by the wheel and must
+remain byte-identical to `public_modules/stats/Stats*.py`; the release check
+rejects drift. Add a module by committing its source and one explicit manifest
+entry; never place credentials or personal factor code in this directory.
+
+`examples/` only demonstrates how to use these modules. It is optional
+explanatory material, never a deployment source or an implementation authority.
 
 Researcher-facing configuration examples use XML only.
 

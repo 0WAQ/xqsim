@@ -94,6 +94,9 @@ v1、v2 的有限值位置完全一致，相关系数均为 1.0，最大绝对�
 配置中的逻辑 `module_id` 无需与文件名相同。新增公共实现时提交源码并修改
 `public_modules/deploy.json`，校验与部署步骤统一见
 [部署手册](deployment.md)。
+`public_modules/` 是公共模块的权威实现目录；`examples/` 只补充展示配置和调用方式，
+不得作为部署源或判断模块行为的依据。
+
 研究员从零开始使用系统、编写模块和配置 XML 时，以
 [研究员使用手册](researcher_guide.md) 为准。
 

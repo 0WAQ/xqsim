@@ -20,6 +20,7 @@ from release_manifest import (
     BUILD_REQUIRES,
     COMPILED_MODULES,
     EXCLUDED_MODULES,
+    PUBLIC_SOURCE_MIRRORS,
     SOURCE_MODULES,
     SUPPORTED_PLATFORMS,
     SUPPORTED_PYTHON,
@@ -93,6 +94,17 @@ def validate_manifest() -> None:
         if stale:
             details.append(f"manifest entries without source: {sorted(stale)}")
         raise RuntimeError("; ".join(details))
+
+    for module_name, public_relative in PUBLIC_SOURCE_MIRRORS.items():
+        package_source = module_path(module_name)
+        public_source = REPO_ROOT / public_relative
+        if not public_source.is_file():
+            raise RuntimeError(f"public source mirror is missing: {public_source}")
+        if package_source.read_bytes() != public_source.read_bytes():
+            raise RuntimeError(
+                "packaging mirror differs from authoritative public source: "
+                f"{package_source} != {public_source}"
+            )
 
 
 def validate_platform() -> None:

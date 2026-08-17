@@ -27,11 +27,11 @@
     },
     {
       "type": "stats",
-      "source": "xqsim/modules/StatsGeneral.py"
+      "source": "public_modules/stats/StatsGeneral.py"
     },
     {
       "type": "stats",
-      "source": "xqsim/modules/StatsFutures.py"
+      "source": "public_modules/stats/StatsFutures.py"
     },
     {
       "type": "portfolio",

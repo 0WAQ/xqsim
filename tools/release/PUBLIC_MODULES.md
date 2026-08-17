@@ -15,6 +15,9 @@ Public research modules live in the adjacent directories:
 - `config/`: shared XML configuration examples;
 - `utils.py`: shared plain Python/NumPy helpers.
 
+Their authoritative repository sources live under `public_modules/`.
+`examples/` is optional usage documentation and is never deployed.
+
 Configurations may use the built-in macros `${xqsim_operation}`,
 `${xqsim_stats}`, `${xqsim_provider}`, `${xqsim_portfolio}`, `${xqsim_config}`,
 `${xqsim_utils}`, and `${xqsim_data}`. Researcher configurations use XML.
