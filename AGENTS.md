@@ -161,7 +161,9 @@ When tracing a run, these are the key seams:
   resumed run can re-import the alpha modules.
 - **`Meta` (`meta.py`)** — calendar, date index, instrument index, `di`/`ii` mappings,
   run-time params (`set_para` / `get_para`). `Calendar` does bisect-based trade-day
-  math; many configs use string offsets like `TODAY-1`.
+  math; many configs use string offsets like `TODAY-1`. Finite snapshots clamp `TODAY`
+  to their final calendar day; exclusive instrument EndDates beyond that calendar keep
+  the instrument active through the final day.
 - **`DataRepository` (`data_repository.py` / `_impl.py`)** — `DataView` is the abstract
   array-with-offset accessor; alphas/providers consume `dr.get_data("k.close")` and the
   `DataView` resolves into a numpy array shaped `(di_size, ii_size)` (or with a

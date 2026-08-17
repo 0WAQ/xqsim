@@ -107,7 +107,49 @@ def path_trading_day(path: Path, source: Path) -> int | None:
     return None
 
 
+def copy_meta_file(source: Path, target: Path, root: Path, cutoff: int) -> bool:
+    relative = source.relative_to(root).as_posix()
+    if relative == "meta/index/DateIndex.csv":
+        with source.open(newline="", encoding="utf-8") as reader:
+            rows = list(csv.DictReader(reader))
+        kept = [row for row in rows if int(row["TradingDay"]) <= cutoff]
+        if not kept or int(kept[-1]["TradingDay"]) != cutoff:
+            raise RuntimeError(f"calendar cutoff missing: {cutoff}")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("w", newline="", encoding="utf-8") as writer:
+            output = csv.DictWriter(writer, fieldnames=["ID", "TradingDay"])
+            output.writeheader()
+            output.writerows(kept)
+        shutil.copymode(source, target)
+        return True
+    if relative == "meta/index/InstrumentIndex.csv":
+        with source.open(newline="", encoding="utf-8") as reader:
+            rows = list(csv.DictReader(reader))
+        kept = [row for row in rows if int(row["StartDate"]) <= cutoff]
+        target.parent.mkdir(parents=True, exist_ok=True)
+        with target.open("w", newline="", encoding="utf-8") as writer:
+            output = csv.DictWriter(
+                writer, fieldnames=["ID", "WindCode", "StartDate", "EndDate"]
+            )
+            output.writeheader()
+            output.writerows(kept)
+        shutil.copymode(source, target)
+        return True
+    return False
+
+
 def verify_snapshot(target: Path, cutoff: int) -> None:
+    dates, _ = load_calendar(target)
+    if dates[-1] != cutoff:
+        raise RuntimeError(
+            f"snapshot calendar exceeds cutoff: {dates[-1]} != {cutoff}"
+        )
+    instrument_path = target / "meta" / "index" / "InstrumentIndex.csv"
+    with instrument_path.open(newline="", encoding="utf-8") as reader:
+        for row in csv.DictReader(reader):
+            if int(row["StartDate"]) > cutoff:
+                raise RuntimeError(f"future instrument remains in snapshot: {row}")
+
     matrix_count = 0
     for path in target.rglob("*.dat"):
         header, _ = read_header(path)
@@ -181,8 +223,9 @@ def create_snapshot(source: Path, target: Path, requested_cutoff: int) -> None:
                 result = truncate_matrix(path, destination, cutoff, di_mapping)
                 counts[result] += 1
             else:
-                destination.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copy2(path, destination)
+                if not copy_meta_file(path, destination, source, cutoff):
+                    destination.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copy2(path, destination)
                 counts["copied"] += 1
 
         verify_snapshot(temporary, cutoff)

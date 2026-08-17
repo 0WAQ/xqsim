@@ -191,6 +191,9 @@ Stats 最终输出：
 ## 7. 数据层
 
 回测计算需要的行情数据（K线、Universe、行业分类等）由数据层提供。分为两部分：
+有限历史快照允许 `DateIndex.csv` 在过去结束：此时 `TODAY` 收敛到日历最后一个
+交易日。InstrumentIndex 的 EndDate 是排他边界；若 EndDate 晚于日历末日，该合约
+在日历最后一天仍然有效。
 
 ### 7.1 DataRepository（数据读取）
 

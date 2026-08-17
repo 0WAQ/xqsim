@@ -73,16 +73,21 @@ class MetaLoader(object):
                 diff_day -= int(date_str[len("TODAY-"):])
 
             di = cmp_func(self.__meta.total_date_index, today_date)
-            if today_date > self.__meta.total_date_index[di] and cmp_func == common_utils.equal_or_first_less:
+            if di < 0:
+                abort("Date invalid, date %s precedes calendar", date_str)
+            if (today_date > self.__meta.total_date_index[di]
+                    and cmp_func == common_utils.equal_or_first_less
+                    and di + 1 < self.__meta.total_di_size):
                 # weekend for end date
                 di += 1
             di = di + diff_day
-            if di > self.__meta.total_di_size:
-                abort("Date invalid, date %s, di(%s) > meta.total_di_size(%s)", date_str, di, self.__meta.total_di_size)
-            return di
         else:
             abort_if(len(date_str) != 8, "date error: %s", date_str)
-            return cmp_func(self.__meta.total_date_index, int(date_str))
+            di = cmp_func(self.__meta.total_date_index, int(date_str))
+        if di < 0 or di >= self.__meta.total_di_size:
+            abort("Date invalid, date %s, di(%s) outside calendar size(%s)",
+                  date_str, di, self.__meta.total_di_size)
+        return di
 
     def __check_date(self, config_dict: dict):
         if config_dict.get("total", False):
@@ -215,7 +220,7 @@ class MetaLoader(object):
                     start_di = load_begin_di
 
                 if end_date > self.__meta.total_date_index[-1]:
-                    end_di = self.__meta.total_di_mapping[self.__meta.total_date_index[-1]] - 1
+                    end_di = self.__meta.total_di_mapping[self.__meta.total_date_index[-1]]
                 else:
                     end_di = self.__meta.total_di_mapping[end_date] - 1
 

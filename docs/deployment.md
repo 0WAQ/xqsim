@@ -147,8 +147,9 @@ uv run python tools/futures/snapshot_cache.py \
 ```
 
 脚本按 `DateIndex.csv` 将截止日收敛到最近交易日；连续矩阵会截断 payload 并重写
-header，逐日压缩文件只复制截止日以内的数据。目标目录必须不存在，脚本通过临时
-目录完整校验后才原子改名。
+header，逐日压缩文件只复制截止日以内的数据，`DateIndex.csv` 同步裁剪，且移除
+截止日后才上市的 InstrumentIndex 行。目标目录必须不存在，脚本通过临时目录完整
+校验后才原子改名。
 
 配置统一使用 `${xqsim_data}`；独立 Python 工具默认读取 `/usr/local/xqsim/data`，
 测试其他根目录时设置 `XQSIM_DATA_HOME`。
