@@ -38,7 +38,7 @@ def main():
     common_days = np.intersect1d(my_days, their_days)
     my_rows = np.searchsorted(my_days, common_days)
     their_rows = np.searchsorted(their_days, common_days)
-    mine = my[my_rows][:, HOT_SLOT::SLOTS_SIZE].astype(np.float32)
+    mine = my[my_rows].astype(np.float32)
     their = theirs[their_rows].astype(np.float32)
 
     same = (mine == their) | (np.isnan(mine) & np.isnan(their))

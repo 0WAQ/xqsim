@@ -1,6 +1,6 @@
 # 期货交割库库存 provider, 移植自 ldcta provider/futures_instock.py。
 # 数据源: wind.dbo.CFUTURESINSTOCK join Meta.dbo.CTAMap (中文名 -> 品种码)
-# 产出 (pi 维, 写在各品种 48 号主力槽列):
+# 产出 (pi 维 di×80 原生存储, 文件名 M80, 见 MssqlProvider.write_pi_data):
 #   istk.instock        IN_STOCK
 #   istk.avail_instock  AVAILABLE_IN_STOCK
 # 语义 (与 ldcta 一致): 有行的日子字段为 null 时取上一日值; 无行的日子保持 NaN。

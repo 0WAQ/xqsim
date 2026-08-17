@@ -53,7 +53,7 @@ LDCTA_MAX_INT = 2147483647
 SLOTS_SIZE = 50
 HOT_SLOT = 48
 
-# pi 维字段: xqsim 侧值在各品种 48 号主力槽列 (di×ii), ldcta 侧是 di×80
+# pi 维字段: 两侧都是 di×80 原生布局 (xqsim 侧文件名 M80)
 PI_FIELD_MAP = {
     "wh.deliverable": ("Warehouse", "Warehouse.deliverable.M80.f.dat"),
     "wh.on_warrant": ("Warehouse", "Warehouse.on_warrant.M80.f.dat"),
@@ -223,7 +223,7 @@ def main():
         if args.detail == tag:
             detail_mismatch(tag, my_days, my, their_days, theirs, dr)
 
-    # pi 维字段: 我方取各品种 48 号主力槽列 (di×80), 与对方 M80 直接比
+    # pi 维字段: 两侧 di×80 直接比
     for tag, (dir_name, file_name) in sorted(PI_FIELD_MAP.items()):
         if tag not in xqsim_data:
             print("%-24s MISSING in xqsim cache" % tag)
@@ -237,8 +237,7 @@ def main():
         common_days = np.intersect1d(my_days, their_days)
         my_rows = np.searchsorted(my_days, common_days)
         their_rows = np.searchsorted(their_days, common_days)
-        my_pi = my[my_rows][:, HOT_SLOT::SLOTS_SIZE]
-        print(compare_matrix(tag, my_pi, theirs[their_rows]))
+        print(compare_matrix(tag, my[my_rows], theirs[their_rows]))
 
     # hot.ii / hot.ii_next 与 ldcta 的 M80 布局单独比对
     for tag, file_name in (("hot.ii", "Hot.hot_ii.M80.i.dat"),

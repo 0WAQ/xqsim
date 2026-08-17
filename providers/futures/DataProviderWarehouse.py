@@ -1,6 +1,6 @@
 # 期货仓单 provider, 移植自 ldcta provider/futures_warehouse.py。
 # 数据源: wind.dbo.CFUTURESWAREHOUSESTOCKS (WAREHOUSE_NAME=N'总计', 品种级日度仓单)
-# 产出 (pi 维, 写在各品种 48 号主力槽列, 见 MssqlProvider.write_pi_data):
+# 产出 (pi 维 di×80 原生存储, 文件名 M80, 见 MssqlProvider.write_pi_data):
 #   wh.deliverable / wh.on_warrant / wh.available_warehouse /
 #   wh.in / wh.out / wh.cancelled_warrants / wh.effective_forecast
 # 语义 (与 ldcta 一致): 有行的日子字段为 null 时取上一日值; 无行的日子保持 NaN。

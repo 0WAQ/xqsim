@@ -1,6 +1,6 @@
 # wind 商品库存 provider, 移植自 ldcta provider/futures_wind_commodity_data.py。
 # 数据源: wind.dbo.CFUTURESINSTOCK join wind.dbo.CFUTURESCONTPRO (中文名 -> 品种码)
-# 产出 (pi 维, 写在各品种 48 号主力槽列):
+# 产出 (pi 维 di×80 原生存储, 文件名 M80, 见 MssqlProvider.write_pi_data):
 #   wc.in_stock / wc.in_stock_total / wc.available_in_stock
 # 语义 (与 ldcta 一致): 无逐日前填, null -> NaN。
 # 与 ldcta 的差异: **修复三个 save_dat 同写 in_stock_buffer 的 bug**

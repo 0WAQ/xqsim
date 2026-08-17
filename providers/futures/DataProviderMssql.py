@@ -64,12 +64,10 @@ class MssqlProvider(ProviderBase):
         return None
 
     def write_pi_data(self, tag: str, pi_values: np.ndarray):
-        """pi 维 (di, pi_size) 数据写进 ii 空间: 值放在该品种 48 号主力槽列,
-        其余列 NaN。消费方按 ii = pi*50+48 列读取"""
-        data = np.full((self.meta.di_size, self.meta.ii_size), nan, np.float64)
-        pi_size = self.meta.ii_size // SLOTS_SIZE
-        data[:, HOT_SLOT::SLOTS_SIZE] = pi_values[:, :pi_size]
-        self.write_data(tag, data)
+        """pi 维 (di, pi_size) 数据原生存储: xqsim 缓存格式支持任意列数
+        (shape[1] != meta.ii_size 时文件名记为 M80, 读写已验证), 消费方按
+        view.data[:, pi] 直接读取"""
+        self.write_data(tag, pi_values.astype(np.float64))
 
     def fetch_oi_rows(self) -> list:
         """拉取持仓量序列供主力判定: [(trading_day:int, code:str, oi:float)]"""
