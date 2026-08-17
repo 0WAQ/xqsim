@@ -159,7 +159,8 @@ header，逐日压缩文件只复制截止日以内的数据，`DateIndex.csv` �
 `--meta /usr/local/xqsim/data/futures/cc --index-category FUTURES`。
 
 当前共享目录不部署股票数据。框架仍保留股票支持；未来需要时应另行创建
-`data/stocks/cc`，并先用 `providers/stocks/DataProviderMetaUpdater.py` 刷新生产 meta。
+`/usr/local/xqsim/data/stocks/cc`，并先用
+`providers/stocks/DataProviderMetaUpdater.py` 刷新生产 meta。
 
 发布框架只创建并保留数据目录，不复制、删除或回滚数据。Provider 源码不得包含
 数据库凭据；checkpoint、个人因子和运行输出仍不属于共享安装目录。

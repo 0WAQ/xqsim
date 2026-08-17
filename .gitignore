@@ -64,8 +64,8 @@ coverage.xml
 # xqsim 把缓存写到 meta_dir / output_cache_dir，体积大且日变，
 # 这些目录不应进 git。
 # ---------------------------------------------------------------------
-# 仅忽略业务数据目录 (Data/), 保留 meta/ (DateIndex/InstrumentIndex 等),
-# 否则引擎 meta_loader 会找不到索引文件.
+# 仓库根级 data/（包括 meta 索引）全部是本地或运行时数据，不进 Git。
+/data/
 providers/cc/Data/
 providers/cc_update/Data/
 /cc/Data/
@@ -91,8 +91,6 @@ result.log
 .env
 .env.*
 !.env.example
-
-data/
 
 # Researcher-owned factor adaptations remain local and are not versioned.
 examples/alpha_demo/AlphaJrxDaily/

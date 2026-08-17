@@ -32,9 +32,8 @@ xqsim-py/
 │   ├── stats/             # canonical public Stats implementations
 │   ├── portfolio/         # canonical public Portfolio implementations
 │   └── utils.py           # canonical public NumPy helpers
-├── data/                  # 仓库内 bootstrap/迁移源，不是生产运行路径
-│   ├── stocks/cc/meta/    # Git 跟踪的股票 meta 引导数据
-│   └── futures/           # 本地回退副本；生产数据在 /usr/local/xqsim/data
+├── data/                  # wholly Git-ignored local data; never a deployment source
+│   └── futures/           # optional local copy; production lives under /usr/local/xqsim/data
 ├── examples/              # usage demonstrations only; never canonical/deployed sources
 │   ├── sample_config.yml
 │   ├── sample_config.xml
@@ -151,9 +150,10 @@ defaults to `/usr/local/xqsim/data/futures/cc` and needs MSSQL access plus
 + `adj_window: -1`, already in that config). Consistency against the legacy ldcta cache
 is verified with `tools/futures/compare_ldcta.py`; semantics and validation results are
 documented in `docs/futures_adaptation.md` §4.1.
-The shared runtime currently provisions futures only: `data/futures/cc` is the live
-cache and `data/futures/cc_2024` is the fixed cutoff snapshot. Rebuild that snapshot
-with `tools/futures/snapshot_cache.py`; do not copy and rename the live cache.
+The shared runtime currently provisions futures only:
+`/usr/local/xqsim/data/futures/cc` is the live cache and `cc_2024` is the fixed
+cutoff snapshot. Rebuild that snapshot with `tools/futures/snapshot_cache.py`;
+do not copy and rename the live cache. The repository-root `data/` is never tracked.
 
 ## Architectural anchors
 

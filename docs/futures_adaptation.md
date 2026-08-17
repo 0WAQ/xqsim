@@ -23,8 +23,8 @@
 引擎入口已通（`uv sync` + `uv run xqsim --version`），跑起来还需：
 
 1. **meta 索引**：`meta_dir` 下要有 `meta/index/{DateIndex,InstrumentIndex,StaticIndexSize}.csv`。
-   仓库 `data/stocks/cc/meta/` 保留 Git 跟踪的股票引导副本，但当前共享运行目录不
-   部署股票数据；期货侧由
+   仓库根级 `data/` 完全不受 Git 跟踪；所需 meta 必须由数据生成流程产生或由
+   维护者随数据包复制。当前共享运行目录不部署股票数据；期货侧由
    `providers/futures/DataProviderMetaUpdater.py` 生成到 `/usr/local/xqsim/data/futures/cc/meta/`。
 2. **sample 配置路径**：`examples/sample_config.yml` 假设工作目录有 `./module` 和 `./cc`，
    是旧布局遗留；要么搭 staging 目录做软链，要么改配置里的 `provider_dir` 宏。
