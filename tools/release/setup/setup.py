@@ -40,7 +40,7 @@ setup(
     entry_points={
         "console_scripts": [
             "xqsim=xqsim.xqsim_run:main",
-            "stats_general=xqsim.modules.stats_general:main",
+            "stats_general=xqsim.modules.StatsGeneral:main",
         ]
     },
     include_package_data=False,

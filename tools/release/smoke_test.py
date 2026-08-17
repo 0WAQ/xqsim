@@ -42,8 +42,8 @@ def main() -> None:
         assert suffix in {".so", ".pyd"}, (module_name, module.__file__)
 
     # Built-ins remain file-path-loadable Python modules.
-    importlib.import_module("xqsim.modules.stats_general")
-    importlib.import_module("xqsim.modules.stats_futures")
+    importlib.import_module("xqsim.modules.StatsGeneral")
+    importlib.import_module("xqsim.modules.StatsFutures")
     print(
         f"xqsim {distribution_version}: imported {len(COMPILED_MODULES)} "
         "binary modules successfully"

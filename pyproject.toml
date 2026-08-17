@@ -40,7 +40,7 @@ release = [
 
 [project.scripts]
 xqsim = "xqsim.xqsim_run:main"
-stats_general = "xqsim.modules.stats_general:main"
+stats_general = "xqsim.modules.StatsGeneral:main"
 update_tools = "xqsim_data_tools.update_tools:cli"
 
 # flat layout

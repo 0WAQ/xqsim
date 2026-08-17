@@ -15,15 +15,15 @@ xqsim-py/
 ├── xqsim_data_tools/       # Prefect flows + update_tools CLI (installable package)
 ├── providers/             # ProviderBase scripts referenced by absolute path from YAML
 │   ├── stocks/            # A股 providers (MySQL 数据源)
-│   │   ├── *.py           # kline / universe / industry / wind_* / barra / static_provider ...
+│   │   ├── DataProvider*.py # Kline / Universe / Industry / Wind* / Barra / Static ...
 │   │   ├── *.yml          # config_production / config_debug / config_csv / config_single
 │   │   └── mysql.json
 │   └── futures/           # 期货 providers (MSSQL 数据源, ldcta 拆分移植)
-│       ├── *.py           # kline / universe / hot / instrument_info / meta_updater /
-│       │                  # mssql_provider(基类) / futures_common(代码换算) / hot_builder(主力判定)
-│       │                  # warehouse / instock / wind_commodity(pi 维) / positions_rank(会员持仓 cube)
-│       │                  # industry(品种行业分类 ind.l1/ind.sector, 不连库, 读 industries.csv)
-│       ├── industries.csv # 品种 → industry_l1 × CTA 粗行业 静态表 (industry.py 数据源)
+│       ├── DataProvider*.py # Kline / Universe / Hot / InstrumentInfo / MetaUpdater /
+│       │                  # Mssql(基类) / FuturesCommon(代码换算) / HotBuilder(主力判定)
+│       │                  # Warehouse / Instock / WindCommodity(pi 维) / PositionsRank(会员持仓 cube)
+│       │                  # Industry(品种行业分类 ind.l1/ind.sector, 不连库, 读 industries.csv)
+│       ├── industries.csv # 品种 → industry_l1 × CTA 粗行业 静态表 (DataProviderIndustry.py 数据源)
 │       ├── config_production.yml
 │       └── mssql.json
 ├── public_modules/        # reviewed researcher-visible modules + deploy allowlist
@@ -103,7 +103,7 @@ See `docs/deployment.md` for all operational commands and
 
 Console entry points (declared in `pyproject.toml`):
 - `xqsim` → `xqsim.xqsim_run:main`
-- `stats_general` → `xqsim.modules.stats_general:main`
+- `stats_general` → `xqsim.modules.StatsGeneral:main`
 - `update_tools` → `xqsim_data_tools.update_tools:cli`
 
 ## Running the simulator
@@ -138,7 +138,7 @@ The same simulator can also be driven from a Python module by calling
 the cache without simulating. See `providers/stocks/config_production.yml` for the canonical
 "build only" config.
 
-Futures side: generate meta first (`uv run python providers/futures/meta_updater.py`,
+Futures side: generate meta first (`uv run python providers/futures/DataProviderMetaUpdater.py`,
 defaults to `/usr/local/xqsim/data/futures/cc` and needs MSSQL access plus
 `providers/futures/mssql.json`), then
 `uv run xqsim -c providers/futures/config_production.yml` (needs `index_category: FUTURES`
@@ -183,7 +183,7 @@ When tracing a run, these are the key seams:
   instead.
 
 Provider configs reference Python files by absolute path (`file_path:
-${provider_dir}/kline.py`), and the simulator dynamically imports them — moving or
+${provider_dir}/DataProviderKline.py`), and the simulator dynamically imports them — moving or
 renaming a provider file means updating every YAML/XML that references it.
 
 **Import shims for external code** — `api.py` re-exports everything from
@@ -248,7 +248,7 @@ or write a one-off `examples/module_demo/`-style script instead.
   through configs rather than computing dates in Python.
 - MySQL credentials live in `providers/stocks/mysql.json` (MSSQL for futures:
   `providers/futures/mssql.json`). Providers default to that
-  filename next to `static_provider.py`; override per-provider via `mysql_config`
+  filename next to `DataProviderStatic.py`; override per-provider via `mysql_config`
   in the YAML. The committed file is a placeholder (`127.0.0.1` / `datareader`),
   replace it locally before pointing at a real DB.
 - When adding a module under `xqsim/`, classify it explicitly in
@@ -261,6 +261,12 @@ or write a one-off `examples/module_demo/`-style script instead.
   Provider files export the same-named class or `create`; factor files remain in
   researcher workspaces and export `Alpha` or `create`. The loader keys modules
   by absolute path, so equal filenames in different directories are valid.
+  Python filenames use a role prefix plus PascalCase: `AlphaOpXxx.py`,
+  `StatsXxx.py`, and `DataProviderXxx.py`. Config `module_id` values are logical
+  identifiers and do not need to match filenames. Linux paths are case-sensitive;
+  rename the file and all YAML/XML/deployment references in one change.
+  Put directory-local reusable functions in lowercase `utils.py`; helper modules
+  are not required to use a role prefix and must not be registered as plugins.
   Contributions must be reviewed and deployed rather than edited in place;
   credentials never belong in the Provider directory. Add shared files through
   `public_modules/deploy.json`; follow `docs/deployment.md` for validation and

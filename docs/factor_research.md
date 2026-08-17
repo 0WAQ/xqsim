@@ -85,8 +85,10 @@ v1、v2 的有限值位置完全一致，相关系数均为 1.0，最大绝对�
 不是协作工作区：贡献应经过 Git 审核后部署，不能直接在线修改。
 
 当前公共清单包含通用/期货 Stats，以及 AlphaJrxDaily 已验证的行业中性、可用性
-过滤、逆波动加权、持有期平均、booksize 缩放和主力映射 Operation。配置例如使用
-`${xqsim_operation}/op_sector_neutralize.py`。新增公共实现时提交源码并修改
+过滤、逆波动加权、持有期平均、booksize 缩放和主力映射 Operation。公共模块文件名
+统一使用角色前缀加 PascalCase：`AlphaOpXxx.py`、`StatsXxx.py`、
+`DataProviderXxx.py`；例如 `${xqsim_operation}/AlphaOpSectorNeutralize.py`。
+配置中的逻辑 `module_id` 无需与文件名相同。新增公共实现时提交源码并修改
 `public_modules/deploy.json`，校验与部署步骤统一见
 [部署手册](deployment.md)。
 

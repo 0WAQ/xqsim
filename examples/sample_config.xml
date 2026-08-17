@@ -11,11 +11,11 @@
     <Universe startdate="20220401" enddate="20220428"/>
     <Modules>
         <Module id="AlphaDemo" path="./examples/module_demo/alpha_demo.py" handler="AlphaHandler"/>
-        <Module id="OpDemo" path="${MODULES}/op_demo.py" handler="AlphaOpsHandler"/>
-        <Module id="OpPower" path="${MODULES}/alphaoppower.py" handler="AlphaOpsHandler"/>
-        <Module id="OP2" path="${MODULES}/alphaopemadecay.py" handler="AlphaOpsHandler"/>
-        <Module id="OP3" path="${MODULES}/alphaopriskneut.py" handler="AlphaOpsHandler"/>
-        <Module id="StatsSimple" path="${xqsim_modules}/stats_general.py" handler="StatsRegistry"/>
+        <Module id="OpDemo" path="${MODULES}/AlphaOpDemo.py" handler="AlphaOpsHandler"/>
+        <Module id="OpPower" path="${MODULES}/AlphaOpPower.py" handler="AlphaOpsHandler"/>
+        <Module id="OP2" path="${MODULES}/AlphaOpEmaDecay.py" handler="AlphaOpsHandler"/>
+        <Module id="OP3" path="${MODULES}/AlphaOpRiskNeut.py" handler="AlphaOpsHandler"/>
+        <Module id="StatsSimple" path="${xqsim_modules}/StatsGeneral.py" handler="StatsRegistry"/>
         <Module id="PortfolioSimple" path="${MODULES}/portfolio.py" handler="PortfolioHandler"/>
     </Modules>
     <Portfolio booksize="20e6" moduleId="PortfolioSimple" id="MyPort" homecurrency="CNY" combinationId="AlphaComboSimple" printStats="true" checkpoint="true" save="true"

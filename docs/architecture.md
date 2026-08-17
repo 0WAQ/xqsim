@@ -317,8 +317,8 @@ Provider 通过配置注册，在回测前的 build 阶段运行：
 <QSim>
     <Constants build="true" niodatapath="/usr/local/xqsim/data/stocks/cc"/>
     <Modules>
-        <Module id="KLine" path="./kline.py" handler="ProviderHandler"/>
-        <Module id="Universe" path="./universe.py" handler="ProviderHandler"/>
+        <Module id="KLine" path="./DataProviderKline.py" handler="ProviderHandler"/>
+        <Module id="Universe" path="./DataProviderUniverse.py" handler="ProviderHandler"/>
     </Modules>
 </QSim>
 ```
@@ -375,10 +375,10 @@ provider/校验脚本可用 `XQSIM_DATA_HOME` 覆盖。股票 Provider 写
     <!-- 注册模块 -->
     <Modules>
         <Module id="MyAlpha" path="./my_alpha.py" handler="AlphaHandler"/>
-        <Module id="OpPower" path="./alphaoppower.py" handler="AlphaOpsHandler"/>
-        <Module id="OpDecay" path="./alphaopemadecay.py" handler="AlphaOpsHandler"/>
-        <Module id="OpNeut" path="./alphaopriskneut.py" handler="AlphaOpsHandler"/>
-        <Module id="Stats" path="${xqsim_modules}/stats_general.py" handler="StatsRegistry"/>
+        <Module id="OpPower" path="./AlphaOpPower.py" handler="AlphaOpsHandler"/>
+        <Module id="OpDecay" path="./AlphaOpEmaDecay.py" handler="AlphaOpsHandler"/>
+        <Module id="OpNeut" path="./AlphaOpRiskNeut.py" handler="AlphaOpsHandler"/>
+        <Module id="Stats" path="${xqsim_modules}/StatsGeneral.py" handler="StatsRegistry"/>
     </Modules>
 
     <!-- 回测任务: 因子 + Operator链 + Stats -->

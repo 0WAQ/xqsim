@@ -12,26 +12,26 @@ provider:
   local:
     mysql_config: "mysql.json"
   Universe:
-    file_path: "${provider_dir}/universe.py"
+    file_path: "${provider_dir}/DataProviderUniverse.py"
   Industry:
-    file_path: "${provider_dir}/industry.py"
+    file_path: "${provider_dir}/DataProviderIndustry.py"
   KLine:
-    file_path: "${provider_dir}/kline.py"
+    file_path: "${provider_dir}/DataProviderKline.py"
 #  Barra:
-#    file_path: "${provider_dir}/barra.py"
+#    file_path: "${provider_dir}/DataProviderBarra.py"
   IndexKLine:
-    file_path: "${provider_dir}/index_kline.py"
+    file_path: "${provider_dir}/DataProviderIndexKline.py"
 #  ComponentWeight:
-#    file_path: "${provider_dir}/component_weight.py"
+#    file_path: "${provider_dir}/DataProviderComponentWeight.py"
 #  CiticsIndex:
-#    file_path: "${provider_dir}/citics_index_kline.py"
+#    file_path: "${provider_dir}/DataProviderCiticsIndexKline.py"
 
 ## wind daily
   ASHAREMONEYFLOW:
-    file_path: "${provider_dir}/wind_common.py"
+    file_path: "${provider_dir}/DataProviderWindCommon.py"
     abbr: "mf"
   ASHAREEODDERIVATIVEINDICATOR:
-    file_path: "${provider_dir}/wind_common.py"
+    file_path: "${provider_dir}/DataProviderWindCommon.py"
     abbr: "dv"
 
 

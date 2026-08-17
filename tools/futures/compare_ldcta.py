@@ -1,6 +1,6 @@
 # 比对 xqsim 期货缓存与 ldcta 原始缓存 (QNCTACC2026MSSQL) 的一致性。
 #
-# 前提: 已跑过 meta_updater.py + config_production.yml (build), 产出在
+# 前提: 已跑过 DataProviderMetaUpdater.py + config_production.yml (build), 产出在
 #   /usr/local/xqsim/data/futures/cc (扁平布局, 数据目录与 meta 同级)。两侧日历同源
 #   (CC_Meta_TradingDays_Wind), 按交易日对齐行; 列 (ii) 布局因 pi/slot
 #   分配规则一致而天然对齐。

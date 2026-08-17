@@ -23,8 +23,8 @@ SOURCE_MODULES = (
     "xqsim.data.meta",
     "xqsim.manager",
     "xqsim.modules",
-    "xqsim.modules.stats_futures",
-    "xqsim.modules.stats_general",
+    "xqsim.modules.StatsFutures",
+    "xqsim.modules.StatsGeneral",
     "xqsim.version",
     "xqsim.xqsim_run",
 )
@@ -49,7 +49,7 @@ COMPILED_MODULES = (
 # any current configuration. Keeping the exclusion explicit prevents it from
 # silently returning to a release without a compatibility decision.
 EXCLUDED_MODULES = {
-    "xqsim.modules.stats_simple": "legacy ksim dependency",
+    "xqsim.modules.StatsSimple": "legacy ksim dependency",
 }
 
 # Versions are pinned because they affect generated C code and wheel contents.

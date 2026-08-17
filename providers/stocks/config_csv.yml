@@ -19,7 +19,7 @@ module:
     factor_csv: "${provider_dir}/factor_csv.py"
 
   stats:
-    stats_general: "${bsim_modules}/stats_general.py"
+    stats_general: "${bsim_modules}/StatsGeneral.py"
 
 
 alpha:

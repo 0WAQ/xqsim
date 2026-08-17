@@ -3,35 +3,35 @@
   "modules": [
     {
       "type": "operation",
-      "source": "public_modules/operation/op_availability_mask.py"
+      "source": "public_modules/operation/AlphaOpAvailabilityMask.py"
     },
     {
       "type": "operation",
-      "source": "public_modules/operation/op_holding_average.py"
+      "source": "public_modules/operation/AlphaOpHoldingAverage.py"
     },
     {
       "type": "operation",
-      "source": "public_modules/operation/op_map_to_hot.py"
+      "source": "public_modules/operation/AlphaOpMapToHot.py"
     },
     {
       "type": "operation",
-      "source": "public_modules/operation/op_power_invvol.py"
+      "source": "public_modules/operation/AlphaOpPowerInvvol.py"
     },
     {
       "type": "operation",
-      "source": "public_modules/operation/op_scale_booksize.py"
+      "source": "public_modules/operation/AlphaOpScaleBooksize.py"
     },
     {
       "type": "operation",
-      "source": "public_modules/operation/op_sector_neutralize.py"
+      "source": "public_modules/operation/AlphaOpSectorNeutralize.py"
     },
     {
       "type": "stats",
-      "source": "xqsim/modules/stats_general.py"
+      "source": "xqsim/modules/StatsGeneral.py"
     },
     {
       "type": "stats",
-      "source": "xqsim/modules/stats_futures.py"
+      "source": "xqsim/modules/StatsFutures.py"
     }
   ]
 }

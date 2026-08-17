@@ -25,7 +25,7 @@
 1. **meta 索引**：`meta_dir` 下要有 `meta/index/{DateIndex,InstrumentIndex,StaticIndexSize}.csv`。
    仓库 `data/stocks/cc/meta/` 保留 Git 跟踪的股票引导副本，但当前共享运行目录不
    部署股票数据；期货侧由
-   `providers/futures/meta_updater.py` 生成到 `/usr/local/xqsim/data/futures/cc/meta/`。
+   `providers/futures/DataProviderMetaUpdater.py` 生成到 `/usr/local/xqsim/data/futures/cc/meta/`。
 2. **sample 配置路径**：`examples/sample_config.yml` 假设工作目录有 `./module` 和 `./cc`，
    是旧布局遗留；要么搭 staging 目录做软链，要么改配置里的 `provider_dir` 宏。
 3. **数据源凭证**：kline/universe provider 从 MySQL 抽数，`providers/mysql.json` 是占位符；
@@ -92,7 +92,7 @@ provider 或诊断脚本时可用 `XQSIM_DATA_HOME` 临时覆盖。
 
 - `multiplier`（合约乘数，每品种固定）：新静态票维数据 provider，
   数据可取自 ldcta 的合约信息表（`provider/futures_instrument_info.py` 对应来源）。
-- ~~期货版 stats 模块~~ 已实现 `xqsim/modules/stats_futures.py`（2026-08-10）。
+- ~~期货版 stats 模块~~ 已实现 `xqsim/modules/StatsFutures.py`（2026-08-10）。
   口径取 LDCTA `stats_cta_cfi.cpp` 的名义本金法：alpha 归一到 book_size 名义
   头寸，`pnl = Σ last_value × k.returns`（收益直接用槽位自身的 `k.returns`，
   天然无换月污染，不需要乘数/手数），新建仓当日不计 pnl（隐含昨收成交），
@@ -151,7 +151,7 @@ provider 或诊断脚本时可用 `XQSIM_DATA_HOME` 临时覆盖。
 | meta 数据 | DateIndex / InstrumentIndex（合约 listed/expired）/ time_index 换期货 | 否 |
 | provider | 期货 universe、kline、hot 映射、multiplier、pi 静态数据 | 否（新模块） |
 | op | 品种分组中性化、hot 筛主力/移仓、按手数 sizing | 否（新模块） |
-| stats | 期货盈亏口径（名义本金 × k.returns，已有初版 stats_futures） | 否（新模块） |
+| stats | 期货盈亏口径（名义本金 × k.returns，已有初版 `StatsFutures.py`） | 否（新模块） |
 | 引擎 | Simulator / AlphaTask / DataView / DataManager / checkpoint | **零改动** |
 
 引擎内仅有的两个股票假设，均可用配置绕开：
@@ -187,16 +187,16 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 
 | 文件 | 来源 | 产出 |
 |---|---|---|
-| `futures_common.py` | ldcta `base.py` 纯函数 | wind码→标准码换算、槽位常量 |
-| `mssql_provider.py` | 新建基类（仿 stocks `static_provider.py`） | `exec_sql_fetchall` / `get_ii` / `listed_code` / `fetch_oi_rows` |
-| `meta_updater.py` | `builder/futures_ii.py` | 直接落 meta CSV，砍掉 MSSQL 中间表；**EndDate = 摘牌日下一交易日**；StartDate 吸附到首个 ≥ 上市日的交易日（wind 上市日不一定是交易日） |
-| `hot_builder.py` | `builder/futures_hot.py` | 主力判定内存计算：持仓排序 + 不回退 + 1.1x 滞回；砍掉 hot 表往返 |
-| `kline.py` | `provider/futures_kdata.py` | `k.open/high/low/close/volume/amount/settle/position/preclose/returns` + 48 号主力槽拷贝 |
-| `universe.py` | `provider/futures_universe.py` | `uv.all`（活跃合约）+ `static.pi`；不连库 |
-| `hot.py` | `provider/futures_hot.py` | `hot.ii` / `hot.ii_next`（修掉 ldcta 顺序 bug） |
-| `instrument_info.py` | `provider/futures_instrument_info.py` | `static.multiply` / `static.ticksize` |
-| `industry.py` | 新建（ldcta 无对应） | `ind.l1` / `ind.sector` 品种行业分类（int 平铺同 static.pi，未收录 -1）；不连库，读 `industries.csv`（51 品种 × industry_l1 × CTA 粗行业）；enum 落 `Enum_industry_l1.csv` / `Enum_sector.csv`；静态表，目录存在即跳过，表变更需删 `Industry/` 重建 |
-| `positions_rank.py` | 新建（ldcta 无对应） | `rk.*` 会员排名 cube（见下） |
+| `DataProviderFuturesCommon.py` | ldcta `base.py` 纯函数 | wind码→标准码换算、槽位常量 |
+| `DataProviderMssql.py` | 新建基类（仿 stocks `DataProviderStatic.py`） | `exec_sql_fetchall` / `get_ii` / `listed_code` / `fetch_oi_rows` |
+| `DataProviderMetaUpdater.py` | `builder/futures_ii.py` | 直接落 meta CSV，砍掉 MSSQL 中间表；**EndDate = 摘牌日下一交易日**；StartDate 吸附到首个 ≥ 上市日的交易日（wind 上市日不一定是交易日） |
+| `DataProviderHotBuilder.py` | `builder/futures_hot.py` | 主力判定内存计算：持仓排序 + 不回退 + 1.1x 滞回；砍掉 hot 表往返 |
+| `DataProviderKline.py` | `provider/futures_kdata.py` | `k.open/high/low/close/volume/amount/settle/position/preclose/returns` + 48 号主力槽拷贝 |
+| `DataProviderUniverse.py` | `provider/futures_universe.py` | `uv.all`（活跃合约）+ `static.pi`；不连库 |
+| `DataProviderHot.py` | `provider/futures_hot.py` | `hot.ii` / `hot.ii_next`（修掉 ldcta 顺序 bug） |
+| `DataProviderInstrumentInfo.py` | `provider/futures_instrument_info.py` | `static.multiply` / `static.ticksize` |
+| `DataProviderIndustry.py` | 新建（ldcta 无对应） | `ind.l1` / `ind.sector` 品种行业分类（int 平铺同 static.pi，未收录 -1）；不连库，读 `industries.csv`（51 品种 × industry_l1 × CTA 粗行业）；enum 落 `Enum_industry_l1.csv` / `Enum_sector.csv`；静态表，目录存在即跳过，表变更需删 `Industry/` 重建 |
+| `DataProviderPositionsRank.py` | 新建（ldcta 无对应） | `rk.*` 会员排名 cube（见下） |
 | `config_production.yml` | 新建 | `index_category: FUTURES`、`adj_window: -1` |
 
 ### 会员排名 cube（`rk.*`,wind `CCOMMODITYFUTURESPOSITIONS`,2016 年后 top20 时代）
@@ -212,8 +212,9 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
   跨合约聚合同品种持仓时必须剔除 `ii%50 in {48,49}` 的槽，否则主力合约
   被重复计一遍（2026-08-15 金标对拍实证）
 - 会员身份：compcode 优先、缺失回退 `NAME::会员名`
-  （`futures_common.member_key`);enum 落 `meta/enum/Enum_member.csv`,
-  **id 只增不改**（`futures_common.load_or_extend_member_enum`,meta_updater
+  （`DataProviderFuturesCommon.member_key`);enum 落 `meta/enum/Enum_member.csv`,
+  **id 只增不改**（`DataProviderFuturesCommon.load_or_extend_member_enum`,
+  `DataProviderMetaUpdater.py`
   播种 + provider 运行时追加新会员）
 - 消费：`dr.get_data("rk.long_pos")` → (di, 20, ii) 视图；`meta.enum_index_dict["member"][id]` 反查会员
 - 注意：曾有一版 top20 聚合 provider(`pos.*`）已废弃删除，合计由 cube
@@ -232,7 +233,7 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
   原包把 alpha 截到 start_date 后再算 InvVol60，窗口起点有 60 日
   空仓盲区，适配版保留了 backdays 热身（更合理，非错误）
 
-运行（需 MSSQL 网络，`mssql.json` 已配）：`meta_updater.py` →
+运行（需 MSSQL 网络，`mssql.json` 已配）：`DataProviderMetaUpdater.py` →
 `uv run xqsim -c providers/futures/config_production.yml` →
 `tools/futures/compare_ldcta.py` 比对。
 
@@ -268,12 +269,12 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 - **增量路径未验证**：目前只跑过全量重建；`TODAY-10` 小窗口日更有两个已知
   薄弱点——hot 窗口首日播种差异、`do_generate` 目录存在即静默跳过。
   首次日更后应对当天数据跑一次 compare_ldcta 确认与全量一致
-- `hot_builder` 窗口首日播种与 ldcta 历史表不同（日更小窗口首日主力可能差一天，
+- `DataProviderHotBuilder.py` 窗口首日播种与 ldcta 历史表不同（日更小窗口首日主力可能差一天，
   日更建议带几天回看窗口）
 - 死品种 hot 槽语义差异（上表），若下游策略依赖陈旧主力需知悉
-- **`stats_general` 是股票口径，期货不可用**：其 `__init__` 无条件加载
+- **`StatsGeneral.py` 是股票口径，期货不可用**：其 `__init__` 无条件加载
   `k.vwap/k.value/k.ret/k.upper/k.lower`（期货只有 `k.returns`，无 vwap/value/
-  涨跌停字段），配置引用即 abort。期货版 `stats_futures` 已实现并接入 demo
+  涨跌停字段），配置引用即 abort。期货版 `StatsFutures.py` 已实现并接入 demo
   （见 §2.3）；注意 `save_pnl` 依赖的 `utils.pnl_scale` 与 pandas 2.x 不兼容，
   需在调用方先转 Date 列（见 known_issues）
 - ~~pi 维基本面（库存/仓单/现货）二期再搬~~ 已在一期完成（di×80 直写，
@@ -294,7 +295,7 @@ ldcta 已拆分为 `providers/futures/`（对齐 stocks 布局）：
 ## 6. 分期建议
 
 - **一期**：day 级 + 真实合约 ii + hot 映射筛主力 + 名义本金口径 stats（已落地
-  `stats_futures`，见 §2.3）。
+  `StatsFutures.py`，见 §2.3）。
   工作量集中在 provider 移植（MSSQL 读取、换月规则、multiplier、pi）和
   期货版 op 模块。
 - **二期**：分钟/tick 级（夜盘时段与归属）、保证金口径收益。

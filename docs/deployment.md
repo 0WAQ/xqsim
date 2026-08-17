@@ -62,8 +62,8 @@ python -m json.tool /usr/local/xqsim/public-modules.json
 
 ```bash
 /usr/local/xqsim/xqsim \
-  --check-module operation /usr/local/xqsim/operation/op_sector_neutralize.py \
-  --check-module stats /usr/local/xqsim/stats/stats_futures.py
+  --check-module operation /usr/local/xqsim/operation/AlphaOpSectorNeutralize.py \
+  --check-module stats /usr/local/xqsim/stats/StatsFutures.py
 ```
 
 校验某个不可变 release 的哈希：
@@ -133,7 +133,7 @@ rsync -a --checksum --dry-run --itemize-changes \
 第二条命令无输出即内容一致。生成期货数据时先更新 meta，再运行 build 配置：
 
 ```bash
-uv run python providers/futures/meta_updater.py
+uv run python providers/futures/DataProviderMetaUpdater.py
 uv run xqsim -c providers/futures/config_production.yml
 ```
 
@@ -157,7 +157,7 @@ header，逐日压缩文件只复制截止日以内的数据，`DateIndex.csv` �
 `--meta /usr/local/xqsim/data/futures/cc --index-category FUTURES`。
 
 当前共享目录不部署股票数据。框架仍保留股票支持；未来需要时应另行创建
-`data/stocks/cc`，并先用 `providers/stocks/meta_updater.py` 刷新生产 meta。
+`data/stocks/cc`，并先用 `providers/stocks/DataProviderMetaUpdater.py` 刷新生产 meta。
 
 发布框架只创建并保留数据目录，不复制、删除或回滚数据。Provider 源码不得包含
 数据库凭据；checkpoint、个人因子和运行输出仍不属于共享安装目录。

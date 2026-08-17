@@ -11,29 +11,29 @@ global:
 provider:
 
   KLine:
-    file_path: "${provider_dir}/kline.py"
+    file_path: "${provider_dir}/DataProviderKline.py"
 
   Universe:
-    file_path: "${provider_dir}/universe.py"
+    file_path: "${provider_dir}/DataProviderUniverse.py"
 ## financial_simple
 #  ASHAREANNFINANCIALINDICATOR:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #  ASHAREAUDITOPINION:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #  ASHAREFINANCIALINDICATOR:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #  ASHAREISSUINGDATEPREDICT:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #    extra:
 #      - S_STM_PREDICT_ISSUINGDATE
 #      - S_STM_ACTUAL_ISSUINGDATE
 #      - S_STM_CORRECT_NUM
 #      - S_STM_CORRECT_ISSUINGDATE
 #  ASHAREPROFITEXPRESS:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #    actual_ann_dt: "ACTUAL_ANN_DT"
 #  ASHAREPROFITNOTICE:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #    ann_dt: "S_PROFITNOTICE_DATE"
 #    report_period: "S_PROFITNOTICE_PERIOD"
 #    extra:
@@ -41,7 +41,7 @@ provider:
 #      - S_PROFITNOTICE_FIRSTANNDATE
 #
 #  ASHAREACCOUNTINGCHANGE:
-#    file_path: "${provider_dir}/wind_financial_simple.py"
+#    file_path: "${provider_dir}/DataProviderWindFinancialSimple.py"
 #    comp: true
 #    report_period: "BE_AFFECTED_REPORT_PERIOD"
 #    ann_dt: "ANN_DATE"

@@ -8,7 +8,7 @@ global:
   output_cache_dir: "${data_root}/stocks/cc_update"
   build: true
 
-meta_updater: "${provider_path}/meta_updater.py"
+meta_updater: "${provider_path}/DataProviderMetaUpdater.py"
 
 build:
   base: "${provider_path}/config_production.yml"

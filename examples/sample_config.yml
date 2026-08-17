@@ -14,13 +14,13 @@ global:
 
 provider:
   KLine:
-    file_path: "${provider_dir}/kline.py"
+    file_path: "${provider_dir}/DataProviderKline.py"
 
   Universe:
-    file_path: "${provider_dir}/universe.py"
+    file_path: "${provider_dir}/DataProviderUniverse.py"
 
   IndexKLine:
-    file_path: "${provider_dir}/index_kline.py"
+    file_path: "${provider_dir}/DataProviderIndexKline.py"
 
 module:
   alpha:
@@ -28,7 +28,7 @@ module:
     alpha_empty: "${provider_dir}/alpha_empty.py"
 
   stats:
-    stats_general: "${xqsim_modules}/stats_general.py"
+    stats_general: "${xqsim_modules}/StatsGeneral.py"
 
 
 alpha:
