@@ -99,7 +99,8 @@ maintaining a second dependency list. The same manifest supplies explicit hidden
 imports for code executed inside Cython extensions. Builds require CPython 3.12
 with `Python.h` and the pinned PyInstaller; `auditwheel` and `patchelf` remain
 optional wheel portability checks.
-See `tools/release/README.md` for commands and artifact layout.
+See `docs/deployment.md` for all operational commands and
+`tools/release/README.md` for pipeline internals.
 
 Console entry points (declared in `pyproject.toml`):
 - `xqsim` → `xqsim.xqsim_run:main`
@@ -253,9 +254,8 @@ or write a one-off `examples/module_demo/`-style script instead.
   by absolute path, so equal filenames in different directories are valid.
   Contributions must be reviewed and deployed rather than edited in place;
   credentials never belong in the Provider directory. Add shared files through
-  `public_modules/deploy.json`, validate with
-  `python tools/release/deploy.py --check-only`, and deploy with
-  `python tools/release/deploy.py`.
+  `public_modules/deploy.json`; follow `docs/deployment.md` for validation and
+  deployment commands.
 
 ## Living documentation
 
@@ -264,6 +264,8 @@ the framework, including a future reader with no context from the current task.
 
 - `docs/architecture.md` — verified framework behavior, lifecycle, data layout, and
   interfaces. Update it whenever framework behavior changes.
+- `docs/deployment.md` — the single authoritative source for build, deploy,
+  verification, rollback, isolated-test, and offline-build commands.
 - `docs/factor_research.md` — practical factor research, implementation, timing,
   adaptation, and validation guidance. Record reusable conclusions, not a coding log.
 - `docs/idea_keywords.md` — low-friction inbox for ideas or keywords that are not yet

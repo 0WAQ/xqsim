@@ -434,7 +434,7 @@ PyInstaller one-file 启动时会把原生库释放到临时目录，因此目�
 公共目录由发布流程初始化但不覆盖。研究员通过受审核的模块仓库贡献代码，部署后的
 目录对普通用户只读；Provider 凭据、数据缓存、个人因子、输出和 checkpoint 均不
 进入 `/usr/local/xqsim` 的框架 release。完整构建、发布和回滚命令见
-[`tools/release/README.md`](../tools/release/README.md)。
+[部署手册](deployment.md)。
 
 `public_modules/deploy.json` 是公共文件边界：每项显式声明类型和源码，目标文件名
 默认取源码 basename。`tools/release/deploy.py` 在写入前使用目标 `xqsim` ELF 对

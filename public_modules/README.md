@@ -9,17 +9,6 @@ under `xqsim/modules/` and are referenced by the manifest instead of duplicated.
 Add a module by committing its source and one explicit manifest entry; never
 place credentials or personal factor code in this directory.
 
-Validate without writing:
-
-```bash
-python tools/release/deploy.py --check-only
-```
-
-Deploy the listed public modules:
-
-```bash
-python tools/release/deploy.py
-```
-
 Deployment requires the manifest, deployer, and managed sources to be committed;
-unrelated worktree changes do not block it.
+unrelated worktree changes do not block it. All operational commands live in
+[`docs/deployment.md`](../docs/deployment.md).
