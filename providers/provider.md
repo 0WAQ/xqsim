@@ -45,11 +45,15 @@
 示例：
 
 ```xml
+<QSim>
+<...>
 <Providers>
     <Local dir_name="DemoProvider"/>
     <Provider id="SimpleProvider" file_path="${MODULES}/simple_provider.py"/>
     <Provider id="SimpleProvider1" file_path="${MODULES}/simple_provider.py"/>
 </Providers>
+<...>
+</QSim>
 ```
 
 ### 1. `<Providers>`
