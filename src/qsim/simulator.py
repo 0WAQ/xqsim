@@ -47,7 +47,15 @@ def load_xml(config_path, append_macro_dict=None):
                 data = data.replace("${%s}" % k, v)
             xml_dict = eval(data)
         # print(xml_dict)
-        config_dict = {"global": {}, "module": {}, "alpha": {}}
+        config_dict = {"global": {}, "provider": {}, "module": {}, "alpha": {}}
+
+        def ensure_list(value):
+            if value is None:
+                return []
+            if isinstance(value, list):
+                return value
+            return [value]
+
         config_dict["global"]["begin_date"] = xml_dict["Universe"]["startdate"]
         config_dict["global"]["end_date"] = xml_dict["Universe"]["enddate"]
         for k, v in xml_dict["Constants"].items():
@@ -68,7 +76,17 @@ def load_xml(config_path, append_macro_dict=None):
                 config_dict["global"]["cache_list"].append(cache_dict["path"])
             # print(config_dict["global"]["cache_list"])
 
-        for module_dict in xml_dict["Modules"]["Module"]:
+        providers_dict = xml_dict.get("Providers", None)
+        if providers_dict is not None:
+            if providers_dict.get("Local", None) is not None:
+                config_dict["provider"]["local"] = providers_dict["Local"]
+            for provider_dict in ensure_list(providers_dict.get("Provider", [])):
+                provider_id = provider_dict["id"]
+                provider_cfg = provider_dict.copy()
+                provider_cfg.pop("id")
+                config_dict["provider"][provider_id] = provider_cfg
+
+        for module_dict in ensure_list(xml_dict["Modules"]["Module"]):
             if module_dict["handler"] == "AlphaHandler":
                 config_dict["module"].setdefault("alpha", {})[module_dict["id"]] = module_dict["path"]
             elif module_dict["handler"] == "AlphaOpsHandler":
